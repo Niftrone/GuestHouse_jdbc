@@ -1,9 +1,8 @@
 package com.gh.vo;
 
-
 public class User {
-	private String uId;
-	private String name;
+	private String uId; // 컬럼명 u_id
+	private String name; // 컬럼명 u_name
 	private String phNum;
 	
 	public User() {}
@@ -36,6 +35,4 @@ public class User {
 	public String toString() {
 		return "User [uId=" + uId + ", name=" + name + ", phNum=" + phNum;
 	}
-	
-	
 }

@@ -5,14 +5,11 @@ import java.util.ArrayList;
 
 public class Customer extends User {
 	private LocalDate birthday;
-	private String gender;
+	private String gender; // 컬럼명 u_gender
 	private ArrayList<GuestHouse> wishList;
 	private ArrayList<Reservation> rvList;
 
-	public Customer() {
-
-	}
-
+	public Customer() {	}
 	public Customer(String uId, String name, String phNum, LocalDate birthday, String gender) {
 		super(uId, name, phNum);
 		this.birthday = birthday;
@@ -63,5 +60,4 @@ public class Customer extends User {
 		return super.toString() + ", birthday=" + birthday + ", gender=" + gender + ", wishList=" + wishList
 				+ ", rvList=" + rvList + "]";
 	}
-
 }
