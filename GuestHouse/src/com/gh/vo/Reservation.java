@@ -1,16 +1,18 @@
 package com.gh.vo;
 
+import java.time.LocalDate;
+
 public class Reservation {
 	private String rvId; // 컬럼명 rv_id
-	private String sDate; // 컬럼명 rv_sdate
-	private String eDate; // 컬럼명 rv_edate
+	private LocalDate sDate; // 컬럼명 rv_sdate
+	private LocalDate eDate; // 컬럼명 rv_edate
 	private int price; // 컬럼명 rv_price
-	
+
 	public Reservation() {
-		
+
 	}
-	
-	public Reservation(String rvId, String sDate, String eDate, int price) {
+
+	public Reservation(String rvId, LocalDate sDate, LocalDate eDate, int price) {
 		super();
 		this.rvId = rvId;
 		this.sDate = sDate;
@@ -26,19 +28,19 @@ public class Reservation {
 		this.rvId = rvId;
 	}
 
-	public String getsDate() {
+	public LocalDate getsDate() {
 		return sDate;
 	}
 
-	public void setsDate(String sDate) {
+	public void setsDate(LocalDate sDate) {
 		this.sDate = sDate;
 	}
 
-	public String geteDate() {
+	public LocalDate geteDate() {
 		return eDate;
 	}
 
-	public void seteDate(String eDate) {
+	public void seteDate(LocalDate eDate) {
 		this.eDate = eDate;
 	}
 
@@ -54,5 +56,5 @@ public class Reservation {
 	public String toString() {
 		return "Reservation [rvId=" + rvId + ", sDate=" + sDate + ", eDate=" + eDate + ", price=" + price + "]";
 	}
-	
+
 }

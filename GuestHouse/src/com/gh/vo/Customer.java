@@ -1,34 +1,36 @@
 package com.gh.vo;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class Customer extends User {
-	private String birthday;
+	private LocalDate birthday;
 	private String gender;
 	private ArrayList<GuestHouse> wishList;
 	private ArrayList<Reservation> rvList;
-	
+
 	public Customer() {
-		
+
 	}
-	
-	public Customer(String uId, String name, String phNum , String birthday, String gender) {
+
+	public Customer(String uId, String name, String phNum, LocalDate birthday, String gender) {
 		super(uId, name, phNum);
 		this.birthday = birthday;
 		this.gender = gender;
 	}
-	
-	public Customer(String uId, String name, String phNum, String birthday, String gender, ArrayList<GuestHouse> wishList, ArrayList<Reservation> rvList) {
+
+	public Customer(String uId, String name, String phNum, LocalDate birthday, String gender,
+			ArrayList<GuestHouse> wishList, ArrayList<Reservation> rvList) {
 		this(uId, name, phNum, birthday, gender);
 		this.wishList = wishList;
 		this.rvList = rvList;
 	}
 
-	public String getBirthday() {
+	public LocalDate getBirthday() {
 		return birthday;
 	}
 
-	public void setBirthday(String birthday) {
+	public void setBirthday(LocalDate birthday) {
 		this.birthday = birthday;
 	}
 
@@ -58,8 +60,8 @@ public class Customer extends User {
 
 	@Override
 	public String toString() {
-		return super.toString() + ", birthday=" + birthday + ", gender=" + gender + ", wishList=" + wishList + ", rvList=" + rvList
-				+ "]";
+		return super.toString() + ", birthday=" + birthday + ", gender=" + gender + ", wishList=" + wishList
+				+ ", rvList=" + rvList + "]";
 	}
-	
+
 }
