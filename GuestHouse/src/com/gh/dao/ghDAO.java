@@ -1,5 +1,5 @@
 package com.gh.dao;
 
-public class ghDAO {
+public interface ghDAO {
 	
 }
