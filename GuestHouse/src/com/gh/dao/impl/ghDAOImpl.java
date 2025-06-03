@@ -1,5 +1,10 @@
 package com.gh.dao.impl;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -12,8 +17,40 @@ import com.gh.vo.GuestHouse;
 import com.gh.vo.Reservation;
 import com.gh.vo.Room;
 
-public class ghDAOImpl implements ghDAO{
+import config.ServerInfo;
 
+public class ghDAOImpl implements ghDAO{
+	
+	// 싱글톤
+	// Test 클래스의 static 안이 아니라 생성자 안에서 드라이버 로딩 시키기
+	private static ghDAOImpl dao = new ghDAOImpl("127.0.0.1");
+	private ghDAOImpl(String serverIp) {
+		try {
+			Class.forName(ServerInfo.DRIVER_NAME);
+			System.out.println("드라이버 로딩 성공...");
+		} catch (ClassNotFoundException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	public static ghDAOImpl getInstance() {
+		return dao;
+	}
+	
+	/// 공통 로직 (외부, 다른 클래스에서 호출할 일이 없으므로 private) ///
+	private Connection getConnect() throws SQLException { 
+		Connection conn = DriverManager.getConnection(ServerInfo.URL, ServerInfo.USER, ServerInfo.PASS);
+		return conn;
+	}
+	private void closeAll(PreparedStatement ps, Connection conn) throws SQLException { 
+		if(ps != null) ps.close();
+		if(conn != null) conn.close();
+	}
+	private void closeAll(ResultSet rs, PreparedStatement ps, Connection conn) throws SQLException {
+		if(rs != null) rs.close();
+		closeAll(ps, conn);
+	}
+	
+	/// 비즈니스 로직 ///
 	@Override
 	public void insertCustomer(Customer cust) throws DMLException, DuplicateIDException {
 		// TODO Auto-generated method stub
