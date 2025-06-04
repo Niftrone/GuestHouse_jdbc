@@ -506,9 +506,9 @@ public class ghDAOImpl implements ghDAO {
 			}
 			
 		} catch (SQLIntegrityConstraintViolationException  e) {
-			throw new IDNotFoundException("존재하지 않는 사용자 ID(" + uId + ") 또는 게스트하우스 ID(" + ghId + ") 입니다.");
+			throw new IDNotFoundException("존재하지 않는 사용자 ID(" + uId + ") 또는 게스트하우스 ID(" + ghId + ")로 WishList 등록 실패.");
 		} catch (SQLException e) {
-			throw new DMLException("데이터베이스 오류로 위시리스트 추가에 실패했습니다: " + e.getMessage());
+			throw new DMLException("데이터베이스 오류로 위시리스트 추가 실패 :  " + e.getMessage());
 		} finally {
 			// 내일 쌤께 여쭈어보자.
 			closeAll(rs, insertPs, conn);
@@ -518,8 +518,30 @@ public class ghDAOImpl implements ghDAO {
 
 	@Override
 	public void deleteWishList(String uId, String ghId) throws SQLException, IDNotFoundException {
-		// TODO Auto-generated method stub
-
+        Connection conn = null;
+        PreparedStatement ps = null;
+		
+        try {
+			conn = getConnect();
+			
+			String deleteQuery = "DELETE FROM wishlist WHERE u_id = ? AND gh_id = ?";
+			ps = conn.prepareStatement(deleteQuery);
+			ps.setString(1, uId);
+			ps.setString(2, ghId);
+			ps.executeUpdate();
+			
+			// 내일 무조건 출력 안되게 하기
+			System.out.println("고객 " + uId + "의 위시리스트에 " + ghId + "가 삭제되었습니다.");
+			
+			
+		} catch (SQLIntegrityConstraintViolationException e) {
+			throw new IDNotFoundException("존재하지 않는 사용자 ID(" + uId + ") 또는 게스트하우스 ID(" + ghId + ")로 WishList 삭제 실패.");
+		} catch (SQLException e) {
+			throw new DMLException("데이터베이스 오류로 위시리스트 삭제 실패 : " + e.getMessage());
+		} finally {
+			closeAll(ps, conn);
+		}
+        
 	}
 
 	@Override
