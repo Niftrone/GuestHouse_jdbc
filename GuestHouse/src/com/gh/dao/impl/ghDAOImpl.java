@@ -36,6 +36,7 @@ public class ghDAOImpl implements ghDAO {
 			System.out.println(e.getMessage());
 		}
 	}
+	//dasdasd
 
 	public static ghDAOImpl getInstance() {
 		return dao;
