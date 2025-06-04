@@ -112,6 +112,19 @@ public class ghDAOImpl implements ghDAO {
 			rs.close();
 		closeAll(ps, conn);
 	}
+	
+	private Reservation createRV(ResultSet rs) throws SQLException {
+		Reservation rv =  new Reservation(
+							rs.getString("rv_id"),
+							rs.getDate("rv_sdate").toLocalDate(),
+							rs.getDate("rv_edate").toLocalDate(),
+							rs.getInt("rv_price"),
+							rs.getInt("count"),
+							rs.getString("rm_id"),
+							rs.getString("u_id")
+							);
+		return rv;
+	}
 
 	/// 비즈니스 로직 ///
 	// 자바의 date를 sql date로 변환하는 함수를 따로 만들어야 하는가?
@@ -336,19 +349,31 @@ public class ghDAOImpl implements ghDAO {
 
 	@Override
 	public Reservation getReservation(String uId) throws SQLException {
+		Reservation rv = null;
+		
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		
 		try {
 			conn = getConnect();
-			String query = "SELECT * FROM reservation ";
+			String query = "SELECT * FROM reservation WHERE u_id = ?";
+			
+			ps = conn.prepareStatement(query);
+			ps.setString(1, uId);
+			rs = ps.executeQuery();
+			
+			if(rs.next()) {
+				rv = createRV(rs);
+			}
+			return rv;
 			
 		}catch(SQLException e) {
 			throw new DMLException(e.getMessage()); 
+		} finally {
+			closeAll(rs, ps, conn);
 		}
 		
-		return null;
 	}
 
 	@Override
