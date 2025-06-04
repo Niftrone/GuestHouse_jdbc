@@ -21,47 +21,36 @@ public class Room {
 	public String getRmId() {
 		return rmId;
 	}
-
 	public void setRmId(String rmId) {
 		this.rmId = rmId;
 	}
-
 	public String getName() {
 		return name;
 	}
-
 	public void setName(String name) {
 		this.name = name;
 	}
-
 	public String getGender() {
 		return gender;
 	}
-
 	public void setGender(String gender) {
 		this.gender = gender;
 	}
-
 	public int getPrice() {
 		return price;
 	}
-
 	public void setPrice(int price) {
 		this.price = price;
 	}
-
 	public int getCapacity() {
 		return capacity;
 	}
-
 	public void setCapacity(int capacity) {
 		this.capacity = capacity;
 	}
-
 	public GuestHouse getGh() {
 		return gh;
 	}
-
 	public void setGh(GuestHouse gh) {
 		this.gh = gh;
 	}
