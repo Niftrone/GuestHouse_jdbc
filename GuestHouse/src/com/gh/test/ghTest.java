@@ -5,6 +5,9 @@ import java.time.LocalDate;
 
 import com.gh.dao.impl.ghDAOImpl;
 import com.gh.vo.Customer;
+import com.gh.vo.GuestHouse;
+import com.gh.vo.Reservation;
+import com.gh.vo.Room;
 
 public class ghTest {
 
@@ -14,64 +17,38 @@ public class ghTest {
 		//String uId, String name, String phNum, LocalDate birthday, String gender
 		
 		// INSERT CHECK
-//		try {
-//			gh.insertCustomer(new Customer(
-//					"c777","Kingstone","010-1111-2222",LocalDate.of(1996, 01, 13),"M"));
-//		} catch (Exception e) {
-//			System.out.println(e.getMessage());
-//			
-//		}
+		try {
+			gh.insertCustomer(new Customer(
+					"c777","Kingstone","010-1111-2222",LocalDate.of(1996, 01, 13),"M"));
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
 		
 		// Update CHECK
-//		try {
-//			gh.updateCustomer(new Customer(
-//					"c777","Kingstone2","010-1111-3333",LocalDate.of(1996, 01, 13),"M"));
-//		} catch (Exception e) {
-//			System.out.println(e.getMessage());
-//			
-//		}
+		try {
+			gh.updateCustomer(new Customer(
+					"c777","Kingstone2","010-1111-3333",LocalDate.of(1996, 01, 13),"M"));
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
 		
 		// Delete CHECK
-//		try {
-//			gh.deleteCustomer("c777");
-//			gh.updateCustomer(new Customer(
-//					"c777","Kingstone2","010-1111-3333",LocalDate.of(1996, 01, 13),"M"));
-//
-//		} catch (Exception e) {
-//			System.out.println(e.getMessage());
-//			
-//		}
+		try {
+			gh.deleteCustomer("c777");
+			gh.updateCustomer(new Customer(
+					"c777","Kingstone2","010-1111-3333",LocalDate.of(1996, 01, 13),"M"));
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
 		
 		// getCustomer
-			try {
-				System.out.println(gh.getAllCustomer());
-			} catch (Exception e) {
-				System.out.println(e.getMessage());
-			}
+		try {
+			System.out.println(gh.getAllCustomer());
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
 		
-//		try {
-//			gh.insertGH(new GuestHouse("GH010", "윤슬하우스", "Busan"));
-//		} catch (Exception e) {
-//			System.out.println(e.getMessage());
-//		}
-//		try {
-//			gh.insertGH(new GuestHouse("GH011", "윤슬하우스", "Busan"));
-//		} catch (Exception e) {
-//			System.out.println(e.getMessage());
-//		}
-//
-//		try {
-//			gh.updateGH(new GuestHouse("GH022", "윤슬하우스2", "Busan"));
-//		} catch (Exception e) {
-//			System.out.println(e.getMessage());
-//		}
-//		try {
-//			gh.updateGH(new GuestHouse("GH011", "윤슬하우스", "Seoul"));
-//		} catch (Exception e) {
-//			System.out.println(e.getMessage());
-//		}
-//		
-//		try {
 
 // 		try {
 
@@ -107,53 +84,48 @@ public class ghTest {
 //			System.out.println(e.getMessage());
 //		}
 		
-//		try {
-        gh.insertReservation(new Reservation(
-            "RV081", LocalDate.of(2025, 06, 12), LocalDate.of(2025, 06, 15), 2, 
-            new Room("RM001",
-                new GuestHouse("GH001", "소담하우스", "Seoul")
-                ,"햇살방", "F", 55000, 2),
-            new Customer("C035", "임재현","01011110035",  LocalDate.of(1988,10,15), "M")
-            ));
-      } catch (Exception e) {
-        System.out.println(e.getMessage());	
-      }
-
-      try {
-        gh.deleteGH("GH022");
-      } catch (Exception e) {
-        System.out.println(e.getMessage());
-      }
-      try {
-        gh.deleteGH("GH011");
-      } catch (Exception e) {
-        System.out.println(e.getMessage());
-      }
+		try {
+	       gh.insertReservation(new Reservation(
+	            "RV081", LocalDate.of(2025, 06, 12), LocalDate.of(2025, 06, 15), 2, 
+	            new Room("RM001",
+	                new GuestHouse("GH001", "소담하우스", "Seoul")
+	                ,"햇살방", "F", 55000, 2),
+	            new Customer("C035", "임재현","01011110035",  LocalDate.of(1988,10,15), "M")
+	            ));
+	    } catch (Exception e) {
+	    	System.out.println(e.getMessage());	
+	    }
 
       try {
         System.out.println(gh.getReservation("C010"));
       }catch (Exception e) {
         System.out.println(e.getMessage());
       }
+      
+      /////////////////// YJ Method ///////////////////
+      // insertGH
       try {
-        System.out.println("=====전체 게스트하우스 목록 조회=====");
-        gh.getAllGH().stream().forEach(g->System.out.println(g));
-      } catch (SQLException e) {
-        System.out.println(e.getMessage());
-      }
-      try {
-        System.out.println("=====서울 지역 전체 게스트하우스 목록 조회=====");
-        gh.getAllGH("Seoul").stream().forEach(g->System.out.println(g));
-      } catch (SQLException e) {
-        System.out.println(e.getMessage());
-      }
-      try {
-        System.out.println("=====부산 지역 전체 게스트하우스 목록 조회=====");
-        gh.getAllGH("Busan").stream().forEach(g->System.out.println(g));
-      } catch (SQLException e) {
-        System.out.println(e.getMessage());
-      }
-
+			gh.insertGH(new GuestHouse("GH010", "윤슬하우스", "Busan"));
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		try {
+			gh.insertGH(new GuestHouse("GH011", "윤슬하우스", "Busan"));
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		// updateGH
+		try {
+			gh.updateGH(new GuestHouse("GH022", "윤슬하우스2", "Busan"));
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		try {
+			gh.updateGH(new GuestHouse("GH011", "윤슬하우스", "Seoul"));
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		// deleteGH
 		try {
 			gh.deleteGH("GH022");
 		} catch (Exception e) {
@@ -164,12 +136,14 @@ public class ghTest {
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
+		// getAllGH()
 		try {
 			System.out.println("=====전체 게스트하우스 목록 조회=====");
 			gh.getAllGH().stream().forEach(g->System.out.println(g));
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		}
+		// getAllGH(String)
 		try {
 			System.out.println("=====서울 지역 전체 게스트하우스 목록 조회=====");
 			gh.getAllGH("Seoul").stream().forEach(g->System.out.println(g));
@@ -182,6 +156,7 @@ public class ghTest {
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		}
+		// getAvailableRoom
 		try {
 			System.out.println("=====2023-08-24 ~ 2023-08-26 사이에 예약 가능한 F 방 목록 조회=====");
 			// reservation 테이블에 ('RV101', 'C001', 'RM057', '2023-08-24', '2023-08-26', 124000, 1) 데이터 추가
