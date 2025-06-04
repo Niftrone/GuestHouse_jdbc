@@ -495,6 +495,12 @@ public class ghDAOImpl implements ghDAO {
 			
 		try {
 			conn = getConnect();
+			
+			if (!isRoomAvailable(rv.getRoom().getRmId(), rv.getsDate(), rv.geteDate(), rv.getCount(), rv.getCust().getGender(), conn)) {
+			    System.out.println("해당 날짜에 방이 꽉 찼습니다.");
+			    return;
+			}
+			
 			String query = "INSERT INTO reservation(rv_id, u_id, rm_id, rv_sdate, rv_edate, rv_price, count) VALUES (?,?,?,?,?,?,?) ";
 			ps = conn.prepareStatement(query);
 			ps.setString(1, rv.getRvId());
