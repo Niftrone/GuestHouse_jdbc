@@ -31,8 +31,8 @@ public interface ghDAO {
 	void insertGH(GuestHouse gh) throws DMLException, DuplicateIDException;
 	void updateGH(GuestHouse gh) throws DMLException, IDNotFoundException;
 	void deleteGH(String ghId) throws DMLException, IDNotFoundException;
-	void repairRoom(String rmId, LocalDate sDate, LocalDate eDate) throws DMLException, IDNotFoundException;
-	void setEventGH(String ghId, LocalDate sDate, LocalDate eDate, double rate) throws DMLException, IDNotFoundException;
+	void repairRoom(String rmId, LocalDate sDate, LocalDate eDate);
+	void setEventGH(String ghId, LocalDate sDate, LocalDate eDate, double rate);
 	ArrayList<Reservation> getAllRV() throws DMLException;
 	ArrayList<Reservation> getAllRV(LocalDate date) throws DMLException;
 	ArrayList<Reservation> getAllRV(LocalDate date, String ghId) throws DMLException;

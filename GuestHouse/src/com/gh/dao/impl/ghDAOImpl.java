@@ -7,6 +7,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.gh.dao.ghDAO;
 import com.gh.exception.DMLException;
@@ -19,11 +21,12 @@ import com.gh.vo.Room;
 
 import config.ServerInfo;
 
-public class ghDAOImpl implements ghDAO{
-	
+public class ghDAOImpl implements ghDAO {
+
 	// 싱글톤
 	// Test 클래스의 static 안이 아니라 생성자 안에서 드라이버 로딩 시키기
 	private static ghDAOImpl dao = new ghDAOImpl("127.0.0.1");
+
 	private ghDAOImpl(String serverIp) {
 		try {
 			Class.forName(ServerInfo.DRIVER_NAME);
@@ -32,41 +35,98 @@ public class ghDAOImpl implements ghDAO{
 			System.out.println(e.getMessage());
 		}
 	}
+
 	public static ghDAOImpl getInstance() {
 		return dao;
 	}
-	
+
 	/// 공통 로직 (외부, 다른 클래스에서 호출할 일이 없으므로 private) ///
-	private Connection getConnect() throws SQLException { 
+
+	private static Map<String, DiscountInfo> discountInfo = new HashMap<>();
+	private static Map<String, RepairInfo> repairInfo = new HashMap<>();
+
+	private static class DiscountInfo {
+		LocalDate sDate;
+		LocalDate eDate;
+		Double rate;
+
+		DiscountInfo(LocalDate sDate, LocalDate eDate, Double rate) {
+			this.sDate = sDate;
+			this.eDate = eDate;
+			this.rate = rate;
+		}
+	}
+	
+	private static class RepairInfo {
+		LocalDate sDate;
+		LocalDate eDate;
+		
+		RepairInfo(LocalDate sDate, LocalDate eDate) {
+			this.sDate = sDate;
+			this.eDate = eDate;
+		}
+	}
+
+	private int discountedPrice(Reservation rv) {
+		int days = rv.geteDate().getDayOfMonth() - rv.geteDate().getDayOfMonth();
+		double discount = 0.0;
+
+		DiscountInfo info = discountInfo.get(rv.getRvId());
+
+		if (info != null) {
+			boolean over = !(rv.geteDate().isBefore(info.sDate) || rv.getsDate().isAfter(info.eDate));
+			if (over) {
+				discount = info.rate;
+			}
+		}
+
+		return (int) (rv.getPrice() * days * (1 - discount) * rv.getCount());
+
+	}
+	
+	private boolean checkRepair(Reservation rv) {
+		RepairInfo info = repairInfo.get(rv.getRoom().getRmId());
+		if(rv.getsDate() == info.sDate || rv.geteDate() == info.eDate)
+			return true;
+
+		return !rv.getsDate().isBefore(info.sDate) && !rv.geteDate().isAfter(info.eDate);
+	}
+
+	private Connection getConnect() throws SQLException {
 		Connection conn = DriverManager.getConnection(ServerInfo.URL, ServerInfo.USER, ServerInfo.PASS);
 		return conn;
 	}
-	private void closeAll(PreparedStatement ps, Connection conn) throws SQLException { 
-		if(ps != null) ps.close();
-		if(conn != null) conn.close();
+
+	private void closeAll(PreparedStatement ps, Connection conn) throws SQLException {
+		if (ps != null)
+			ps.close();
+		if (conn != null)
+			conn.close();
 	}
+
 	private void closeAll(ResultSet rs, PreparedStatement ps, Connection conn) throws SQLException {
-		if(rs != null) rs.close();
+		if (rs != null)
+			rs.close();
 		closeAll(ps, conn);
 	}
-	
+
 	/// 비즈니스 로직 ///
 	@Override
 	public void insertCustomer(Customer cust) throws DMLException, DuplicateIDException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void updateCustomer(Customer cust) throws DMLException, IDNotFoundException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void deleteCustomer(String uId) throws DMLException, IDNotFoundException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -96,7 +156,7 @@ public class ghDAOImpl implements ghDAO{
 	@Override
 	public void insertReservation(Customer cust, Room room, LocalDate sDate, LocalDate eDate) throws DMLException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -108,56 +168,55 @@ public class ghDAOImpl implements ghDAO{
 	@Override
 	public void updateReservation(Reservation rv) throws DMLException, IDNotFoundException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void deleteReservation(String rvId) throws DMLException, IDNotFoundException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void insertWishList(String uId, String ghId) throws DMLException, IDNotFoundException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void deleteWishList(String uId, String ghId) throws DMLException, IDNotFoundException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void insertGH(GuestHouse gh) throws DMLException, DuplicateIDException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void updateGH(GuestHouse gh) throws DMLException, IDNotFoundException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void deleteGH(String ghId) throws DMLException, IDNotFoundException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
-	public void repairRoom(String rmId, LocalDate sDate, LocalDate eDate) throws DMLException, IDNotFoundException {
-		// TODO Auto-generated method stub
-		
+	public void repairRoom(String rmId, LocalDate sDate, LocalDate eDate){
+		repairInfo.put(rmId,new RepairInfo(sDate, eDate));
+
 	}
 
 	@Override
-	public void setEventGH(String ghId, LocalDate sDate, LocalDate eDate, double rate)
-			throws DMLException, IDNotFoundException {
-		// TODO Auto-generated method stub
-		
+	public void setEventGH(String ghId, LocalDate sDate, LocalDate eDate, double rate){
+		discountInfo.put(ghId, new DiscountInfo(sDate, eDate, rate));
+
 	}
 
 	@Override
@@ -207,5 +266,5 @@ public class ghDAOImpl implements ghDAO{
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 }
