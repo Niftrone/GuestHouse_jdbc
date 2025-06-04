@@ -26,7 +26,7 @@ public interface ghDAO {
 	Reservation getReservation(String uId) throws SQLException;
 	void updateReservation(Reservation rv) throws SQLException, IDNotFoundException;
 	void deleteReservation(String rvId) throws SQLException, IDNotFoundException;
-	void insertWishList(String uId, String ghId) throws SQLException, IDNotFoundException;
+	void insertWishList(String uId, String ghId) throws SQLException, IDNotFoundException, DuplicateIDException;
 	void deleteWishList(String uId, String ghId) throws SQLException, IDNotFoundException;
 	
 	//manager
