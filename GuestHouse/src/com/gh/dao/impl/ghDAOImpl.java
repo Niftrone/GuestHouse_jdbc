@@ -156,6 +156,7 @@ public class ghDAOImpl implements ghDAO {
 	public void updateCustomer(Customer cust) throws SQLException, IDNotFoundException {
 		Connection conn = null;
 		PreparedStatement ps = null;
+		// TODO Auto-generated method stub
 
 		try {
 			String updateQuery = "UPDATE user SET u_name = ?, birthday = ?, u_gender = ?, phnum = ? WHERE u_id = ?";
@@ -195,6 +196,7 @@ public class ghDAOImpl implements ghDAO {
 
 	@Override
 	public void deleteCustomer(String uId) throws SQLException, IDNotFoundException {
+
 		Connection conn = null;
 		PreparedStatement ps = null;
 		
@@ -221,25 +223,55 @@ public class ghDAOImpl implements ghDAO {
 	}
 
 	@Override
-	public Customer getCustomer(String uId) throws DMLException, IDNotFoundException {
+	public Customer getCustomer(String uId) throws SQLException, IDNotFoundException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public ArrayList<GuestHouse> getAllGH() throws DMLException {
-		// TODO Auto-generated method stub
-		return null;
+	public ArrayList<GuestHouse> getAllGH() throws SQLException {
+		ArrayList<GuestHouse> ghs = new ArrayList<GuestHouse>();
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			conn = getConnect();
+			String query = "SELECT * FROM guesthouse";
+			ps = conn.prepareStatement(query);
+			rs = ps.executeQuery();
+			while(rs.next()) {
+				ghs.add(new GuestHouse(rs.getString("gh_id"), rs.getString("gh_name"), rs.getString("gh_region")));
+			}
+		} finally {
+			closeAll(rs, ps, conn);
+		}
+		return ghs;
 	}
 
 	@Override
-	public ArrayList<GuestHouse> getAllGH(String region) throws DMLException {
-		// TODO Auto-generated method stub
-		return null;
+	public ArrayList<GuestHouse> getAllGH(String region) throws SQLException {
+		ArrayList<GuestHouse> ghs = new ArrayList<GuestHouse>();
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			conn = getConnect();
+			String query = "SELECT * FROM guesthouse WHERE gh_region=?";
+			ps = conn.prepareStatement(query);
+			ps.setString(1, region);
+			rs = ps.executeQuery();
+			while(rs.next()) {
+				ghs.add(new GuestHouse(rs.getString("gh_id"), rs.getString("gh_name"), rs.getString("gh_region")));
+			}
+		} finally {
+			closeAll(rs, ps, conn);
+		}
+		return ghs;
 	}
 
 	@Override
-	public ArrayList<Room> getAvailableRoom(LocalDate sDate, LocalDate eDate, String gender) throws DMLException {
+
+	public ArrayList<Room> getAvailableRoom(LocalDate sDate, LocalDate eDate, String gender) throws SQLException {
 		ArrayList<Room> rooms = new ArrayList<Room>();
 		Connection conn = null;
 		PreparedStatement ps = null;
@@ -268,37 +300,77 @@ public class ghDAOImpl implements ghDAO {
 	}
 
 	@Override
-	public void insertReservation(Customer cust, Room room, LocalDate sDate, LocalDate eDate) throws DMLException {
-		// TODO Auto-generated method stub
+	public void insertReservation(Reservation rv) throws SQLException, DuplicateIDException  {
+		Connection conn = null;
+		PreparedStatement ps = null;
+		Room room = rv.getRoom();
+		
+		if(rv.getCount() > room.getCapacity()) {
+			System.out.println("방의 수용인원보다 많은 인원입니다.");
+			return;
+		}
+			
+		try {
+			conn = getConnect();
+			String query = "INSERT INTO reservation(rv_id, u_id, rm_id, rv_sdate, rv_edate, rv_price, count) VALUES (?,?,?,?,?,?,?) ";
+			ps = conn.prepareStatement(query);
+			ps.setString(1, rv.getRvId());
+			ps.setString(2, rv.getCust().getuId());
+			ps.setString(3, room.getRmId());
+			ps.setDate(4, java.sql.Date.valueOf(rv.getsDate()));
+			ps.setDate(5, java.sql.Date.valueOf(rv.geteDate()));
+			ps.setInt(6, discountedPrice(rv));
+			ps.setInt(7, rv.getCount());
+			
+			System.out.println(ps.executeUpdate() == 1 ? "예약 성공" : "예약 실패");
+			
+		} catch(SQLIntegrityConstraintViolationException e) {
+			throw new DuplicateIDException(e.getMessage());
+		} catch(SQLException e) {
+			throw new DMLException(e.getMessage());
+		} finally {
+			closeAll(ps, conn);
+		}
 
 	}
 
 	@Override
-	public Reservation getReservation(String uId) throws DMLException {
-		// TODO Auto-generated method stub
+	public Reservation getReservation(String uId) throws SQLException {
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		try {
+			conn = getConnect();
+			String query = "SELECT * FROM reservation ";
+			
+		}catch(SQLException e) {
+			throw new DMLException(e.getMessage()); 
+		}
+		
 		return null;
 	}
 
 	@Override
-	public void updateReservation(Reservation rv) throws DMLException, IDNotFoundException {
+	public void updateReservation(Reservation rv) throws SQLException, IDNotFoundException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void deleteReservation(String rvId) throws DMLException, IDNotFoundException {
+	public void deleteReservation(String rvId) throws SQLException, IDNotFoundException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void insertWishList(String uId, String ghId) throws DMLException, IDNotFoundException {
+	public void insertWishList(String uId, String ghId) throws SQLException, IDNotFoundException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void deleteWishList(String uId, String ghId) throws DMLException, IDNotFoundException {
+	public void deleteWishList(String uId, String ghId) throws SQLException, IDNotFoundException {
 		// TODO Auto-generated method stub
 
 	}
@@ -329,6 +401,7 @@ public class ghDAOImpl implements ghDAO {
 			closeAll(rs, ps1, conn);
 			closeAll(rs, ps2, conn);
 		}
+
 	}
 
 	@Override
@@ -360,9 +433,29 @@ public class ghDAOImpl implements ghDAO {
 	}
 
 	@Override
-	public void deleteGH(String ghId) throws DMLException, IDNotFoundException {
-		// TODO Auto-generated method stub
-
+	public void deleteGH(String ghId) throws SQLException, IDNotFoundException {
+		Connection conn = null;
+		PreparedStatement ps1 = null;
+		PreparedStatement ps2 = null;
+		ResultSet rs = null;
+		try {
+			conn = getConnect();
+			String selectQuery = "SELECT gh_id FROM guesthouse WHERE gh_id=?";
+			ps1 = conn.prepareStatement(selectQuery);
+			ps1.setString(1, ghId);
+			rs = ps1.executeQuery();
+			if(rs.next()) {
+				String deleteQuery = "DELETE FROM guesthouse WHERE gh_id =?";
+				ps2 = conn.prepareStatement(deleteQuery);
+				ps2.setString(1, ghId);
+				System.out.println(ps2.executeUpdate()+" 개 DELETE 성공...deleteGH()");
+			} else {
+				throw new IDNotFoundException("삭제하려는 게스트하우스는 없는 id 입니다.");
+			}
+		} finally {
+			closeAll(rs, ps1, conn);
+			closeAll(rs, ps2, conn);
+		}
 	}
 
 	@Override
@@ -378,49 +471,49 @@ public class ghDAOImpl implements ghDAO {
 	}
 
 	@Override
-	public ArrayList<Reservation> getAllRV() throws DMLException {
+	public ArrayList<Reservation> getAllRV() throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public ArrayList<Reservation> getAllRV(LocalDate date) throws DMLException {
+	public ArrayList<Reservation> getAllRV(LocalDate date) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public ArrayList<Reservation> getAllRV(LocalDate date, String ghId) throws DMLException {
+	public ArrayList<Reservation> getAllRV(LocalDate date, String ghId) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public ArrayList<Integer> getQuarterSale(String ghId, int year) throws DMLException {
+	public ArrayList<Integer> getQuarterSale(String ghId, int year) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public int getMonthSale(int year, int month) throws DMLException {
+	public int getMonthSale(int year, int month) throws SQLException {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public String getSeasonalCount(int year) throws DMLException {
+	public String getSeasonalCount(int year) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public ArrayList<GuestHouse> getPopularGH(String region) throws DMLException {
+	public ArrayList<GuestHouse> getPopularGH(String region) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String getGenderRatio(String ghId, int year, int month) throws DMLException {
+	public String getGenderRatio(String ghId, int year, int month) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
