@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,7 +69,7 @@ public class ghDAOImpl implements ghDAO {
 	}
 
 	private int discountedPrice(Reservation rv) {
-		int days = rv.geteDate().getDayOfMonth() - rv.geteDate().getDayOfMonth();
+		int days = rv.geteDate().getDayOfMonth() - rv.getsDate().getDayOfMonth();
 		double discount = 0.0;
 
 		DiscountInfo info = discountInfo.get(rv.getRvId());
@@ -80,7 +81,7 @@ public class ghDAOImpl implements ghDAO {
 			}
 		}
 
-		return (int) (rv.getPrice() * days * (1 - discount) * rv.getCount());
+		return (int) (rv.getRoom().getPrice() * days * (1 - discount) * rv.getCount());
 
 	}
 	
@@ -112,97 +113,137 @@ public class ghDAOImpl implements ghDAO {
 
 	/// 비즈니스 로직 ///
 	@Override
-	public void insertCustomer(Customer cust) throws DMLException, DuplicateIDException {
+	public void insertCustomer(Customer cust) throws SQLException, DuplicateIDException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void updateCustomer(Customer cust) throws DMLException, IDNotFoundException {
+	public void updateCustomer(Customer cust) throws SQLException, IDNotFoundException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void deleteCustomer(String uId) throws DMLException, IDNotFoundException {
+	public void deleteCustomer(String uId) throws SQLException, IDNotFoundException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public Customer getCustomer(String uId) throws DMLException, IDNotFoundException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ArrayList<GuestHouse> getAllGH() throws DMLException {
+	public Customer getCustomer(String uId) throws SQLException, IDNotFoundException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public ArrayList<GuestHouse> getAllGH(String region) throws DMLException {
+	public ArrayList<GuestHouse> getAllGH() throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public ArrayList<Room> getAvailableRoom(LocalDate date, String gender) throws DMLException {
+	public ArrayList<GuestHouse> getAllGH(String region) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void insertReservation(Customer cust, Room room, LocalDate sDate, LocalDate eDate) throws DMLException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public Reservation getReservation(String uId) throws DMLException {
+	public ArrayList<Room> getAvailableRoom(LocalDate date, String gender) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void updateReservation(Reservation rv) throws DMLException, IDNotFoundException {
+	public void insertReservation(Reservation rv) throws SQLException, DuplicateIDException  {
+		Connection conn = null;
+		PreparedStatement ps = null;
+		Room room = rv.getRoom();
+		
+		if(rv.getCount() > room.getCapacity()) {
+			System.out.println("방의 수용인원보다 많은 인원입니다.");
+			return;
+		}
+			
+		try {
+			conn = getConnect();
+			String query = "INSERT INTO reservation(rv_id, u_id, rm_id, rv_sdate, rv_edate, rv_price, count) VALUES (?,?,?,?,?,?,?) ";
+			ps = conn.prepareStatement(query);
+			ps.setString(1, rv.getRvId());
+			ps.setString(2, rv.getCust().getuId());
+			ps.setString(3, room.getRmId());
+			ps.setDate(4, java.sql.Date.valueOf(rv.getsDate()));
+			ps.setDate(5, java.sql.Date.valueOf(rv.geteDate()));
+			ps.setInt(6, discountedPrice(rv));
+			ps.setInt(7, rv.getCount());
+			
+			System.out.println(ps.executeUpdate() == 1 ? "예약 성공" : "예약 실패");
+			
+		} catch(SQLIntegrityConstraintViolationException e) {
+			throw new DuplicateIDException(e.getMessage());
+		} catch(SQLException e) {
+			throw new DMLException(e.getMessage());
+		} finally {
+			closeAll(ps, conn);
+		}
+
+	}
+
+	@Override
+	public Reservation getReservation(String uId) throws SQLException {
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		try {
+			conn = getConnect();
+			String query = "SELECT * FROM reservation ";
+			
+		}catch(SQLException e) {
+			throw new DMLException(e.getMessage()); 
+		}
+		
+		return null;
+	}
+
+	@Override
+	public void updateReservation(Reservation rv) throws SQLException, IDNotFoundException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void deleteReservation(String rvId) throws DMLException, IDNotFoundException {
+	public void deleteReservation(String rvId) throws SQLException, IDNotFoundException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void insertWishList(String uId, String ghId) throws DMLException, IDNotFoundException {
+	public void insertWishList(String uId, String ghId) throws SQLException, IDNotFoundException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void deleteWishList(String uId, String ghId) throws DMLException, IDNotFoundException {
+	public void deleteWishList(String uId, String ghId) throws SQLException, IDNotFoundException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void insertGH(GuestHouse gh) throws DMLException, DuplicateIDException {
+	public void insertGH(GuestHouse gh) throws SQLException, DuplicateIDException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void updateGH(GuestHouse gh) throws DMLException, IDNotFoundException {
+	public void updateGH(GuestHouse gh) throws SQLException, IDNotFoundException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void deleteGH(String ghId) throws DMLException, IDNotFoundException {
+	public void deleteGH(String ghId) throws SQLException, IDNotFoundException {
 		// TODO Auto-generated method stub
 
 	}
@@ -220,49 +261,49 @@ public class ghDAOImpl implements ghDAO {
 	}
 
 	@Override
-	public ArrayList<Reservation> getAllRV() throws DMLException {
+	public ArrayList<Reservation> getAllRV() throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public ArrayList<Reservation> getAllRV(LocalDate date) throws DMLException {
+	public ArrayList<Reservation> getAllRV(LocalDate date) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public ArrayList<Reservation> getAllRV(LocalDate date, String ghId) throws DMLException {
+	public ArrayList<Reservation> getAllRV(LocalDate date, String ghId) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public ArrayList<Integer> getQuarterSale(String ghId, int year) throws DMLException {
+	public ArrayList<Integer> getQuarterSale(String ghId, int year) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public int getMonthSale(int year, int month) throws DMLException {
+	public int getMonthSale(int year, int month) throws SQLException {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public String getSeasonalCount(int year) throws DMLException {
+	public String getSeasonalCount(int year) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public ArrayList<GuestHouse> getPopularGH(String region) throws DMLException {
+	public ArrayList<GuestHouse> getPopularGH(String region) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String getGenderRatio(String ghId, int year, int month) throws DMLException {
+	public String getGenderRatio(String ghId, int year, int month) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
