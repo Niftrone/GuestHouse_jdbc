@@ -389,7 +389,7 @@ public class ghDAOImpl implements ghDAO {
 			}
 		} finally {
 			closeAll(rs1, ps1, null);
-			closeAll(rs2, ps2, null);
+			closeAll(rs2, ps2, conn);
 		}
 		return rooms;
 	}

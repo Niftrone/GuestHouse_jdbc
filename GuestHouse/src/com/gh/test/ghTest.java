@@ -104,6 +104,7 @@ public class ghTest {
       
       /////////////////// YJ Method ///////////////////
       // insertGH
+      System.out.println("=====게스트하우스 등록=====");
       try {
 			gh.insertGH(new GuestHouse("GH010", "윤슬하우스", "Busan"));
 		} catch (Exception e) {
@@ -115,6 +116,7 @@ public class ghTest {
 			System.out.println(e.getMessage());
 		}
 		// updateGH
+		System.out.println("=====게스트하우스 수정=====");
 		try {
 			gh.updateGH(new GuestHouse("GH022", "윤슬하우스2", "Busan"));
 		} catch (Exception e) {
@@ -126,6 +128,7 @@ public class ghTest {
 			System.out.println(e.getMessage());
 		}
 		// deleteGH
+		System.out.println("=====게스트하우스 삭제=====");
 		try {
 			gh.deleteGH("GH022");
 		} catch (Exception e) {
