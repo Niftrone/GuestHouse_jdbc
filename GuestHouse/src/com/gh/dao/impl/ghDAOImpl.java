@@ -609,8 +609,25 @@ public class ghDAOImpl implements ghDAO {
 
 	@Override
 	public String getSeasonalCount(int year) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		String ans = "";
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			conn = getConnect();
+			String query = "SELECT SUM(CASE WHEN YEAR(rv_sdate) = ? AND MONTH(rv_sdate) IN (6, 7, 8) THEN count ELSE 0 END) AS summer, SUM(CASE WHEN (YEAR(rv_sdate) = ? AND MONTH(rv_sdate) = 12) OR (YEAR(rv_sdate) = ? AND MONTH(rv_sdate) IN (1, 2)) THEN count ELSE 0 END) AS winter FROM reservation";
+			ps = conn.prepareStatement(query);
+			ps.setInt(1, year);
+			ps.setInt(2, year);
+			ps.setInt(3, year+1);
+			rs = ps.executeQuery();
+			if(rs.next()) {
+				ans = year%100+" Summer : "+String.valueOf(rs.getInt("summer"))+" / "+year%100+(year%100+1)+" Winter : "+String.valueOf(rs.getInt("winter"));
+			}
+		} finally {
+			closeAll(rs, ps, conn);
+		}
+		return ans;
 	}
 
 	@Override

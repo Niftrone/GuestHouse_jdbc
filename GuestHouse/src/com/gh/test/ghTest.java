@@ -161,6 +161,14 @@ public class ghTest {
 			System.out.println("=====2023-08-24 ~ 2023-08-26 사이에 예약 가능한 F 방 목록 조회=====");
 			// reservation 테이블에 ('RV101', 'C001', 'RM057', '2023-08-24', '2023-08-26', 124000, 1) 데이터 추가
 			gh.getAvailableRoom(LocalDate.of(2023, 8, 24) , LocalDate.of(2023, 8, 26), "F", 1).stream().forEach(r-> System.out.print(r+"\t"));
+			System.out.println();
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		// getSeasonalCount
+		try {
+			System.out.println("=====2023.06~2023.08 하계 기간과 2023.12~2024.02 동계 기간의 예약 손님 수 분석=====");
+			System.out.println(gh.getSeasonalCount(2023));
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		}
