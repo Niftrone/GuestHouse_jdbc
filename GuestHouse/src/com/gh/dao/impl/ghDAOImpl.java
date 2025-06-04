@@ -349,30 +349,48 @@ public class ghDAOImpl implements ghDAO {
 
 	@Override
 
-	public ArrayList<Room> getAvailableRoom(LocalDate sDate, LocalDate eDate, String gender) throws SQLException {
-		ArrayList<Room> rooms = new ArrayList<Room>();
+	public ArrayList<String> getAvailableRoom(LocalDate sDate, LocalDate eDate, String gender, int count) throws SQLException {
+		ArrayList<String> fullrms = new ArrayList<String>(); // 해당 일자에 예약이 다 찬 방을 담을 ArrayList
+		ArrayList<String> rooms = new ArrayList<String>(); // 성별이 같은 방 목록을 담을 ArrayList
 		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-//		LocalDate sDate = LocalDate.of(2025, 6, 1);
-//		LocalDate eDate = LocalDate.of(2025, 6, 3);
-		Period period = Period.between(sDate, eDate);
-		int p = period.getDays();
+		PreparedStatement ps1 = null;
+		PreparedStatement ps2 = null;
+		ResultSet rs1 = null;
+		ResultSet rs2 = null;
+		int p = Period.between(sDate, eDate).getDays();
 		try {
+			conn = getConnect();
 			for(int i=0; i<p; i++) {
-				
+				String query1 = "SELECT CASE WHEN sum(rv.count) >= rm.capacity AND sum(rv.count)+? > rm.capacity THEN rv.rm_id ELSE NULL END fullrmId FROM reservation rv,  user u, room rm WHERE rv.u_id = u.u_id AND rv.rm_id = rm.rm_id AND u.u_gender=? AND (?>=rv_sdate AND ?<rv_edate) GROUP BY rv.rm_id";
+				ps1 = conn.prepareStatement(query1);
+				ps1.setInt(1, count);
+				ps1.setString(2, gender);
+				ps1.setDate(3, java.sql.Date.valueOf(sDate.plusDays(i)));
+				ps1.setDate(4, java.sql.Date.valueOf(sDate.plusDays(i)));
+				rs1 = ps1.executeQuery();
+				while(rs1.next()) {
+					if(rs1.getString("fullrmId") != null && !fullrms.contains(rs1.getString("fullrmId")))
+						fullrms.add(rs1.getString("fullrmId"));
+				}
+//				System.out.println(sDate.plusDays(i));
+//				fullrms.stream().forEach(r->System.out.print(r));
 			}
-//			conn = getConnect();
-//			// 서브쿼리에서 예약 시작일부터 종료일까지 예약 내역에서 rm_id 의 SUM(예약 count) 과 rm_id의 capacity를 비교해야 함
-//			String query = "SELECT * FROM room WHERE rm_gender=? AND rm_id IN (SELECT rm_id FROM reservation GROUP BY id_rm, rv_sdate)";
-//			ps = conn.prepareStatement(query);
-//			ps.setString(1, gender);
-//			rs = ps.executeQuery();
-//			while(rs.next()) {
-//				rooms.add(new Room(rs.getString("rm_id"), rs.getString("rm_name"), rs.getString("rm_gender"), rs.getInt("rm_price"), rs.getInt("capacity")));
-//			}
+			String query2 = "SELECT rm_id FROM room WHERE rm_gender=?";
+			ps2 = conn.prepareStatement(query2);
+			ps2.setString(1, gender);
+			rs2 = ps2.executeQuery();
+			while(rs2.next()) {
+				rooms.add(rs2.getString("rm_id"));
+			}
+//			rooms.stream().forEach(r->System.out.print(r+" "));
+			if(fullrms.size() != 0) {
+				for(String r : fullrms) {
+					rooms.remove(r);
+				}
+			}
 		} finally {
-//			closeAll(rs, ps, conn);
+			closeAll(rs1, ps1, null);
+			closeAll(rs2, ps2, null);
 		}
 		return rooms;
 	}
@@ -488,8 +506,8 @@ public class ghDAOImpl implements ghDAO {
 				throw new DuplicateIDException("추가하려는 게스트하우스의 아이디는 이미 등록되어 있어 추가할 수 없습니다.");
 			}
 		} finally {
-			closeAll(rs, ps1, conn);
-			closeAll(rs, ps2, conn);
+			closeAll(rs, ps1, null);
+			closeAll(null, ps2, conn);
 		}
 
 	}
@@ -517,8 +535,8 @@ public class ghDAOImpl implements ghDAO {
 				throw new IDNotFoundException("수정하려는 게스트하우스는 없는 id 입니다.");
 			}
 		} finally {
-			closeAll(rs, ps1, conn);
-			closeAll(rs, ps2, conn);
+			closeAll(rs, ps1, null);
+			closeAll(null, ps2, conn);
 		}
 	}
 
@@ -543,8 +561,8 @@ public class ghDAOImpl implements ghDAO {
 				throw new IDNotFoundException("삭제하려는 게스트하우스는 없는 id 입니다.");
 			}
 		} finally {
-			closeAll(rs, ps1, conn);
-			closeAll(rs, ps2, conn);
+			closeAll(rs, ps1, null);
+			closeAll(null, ps2, conn);
 		}
 	}
 
