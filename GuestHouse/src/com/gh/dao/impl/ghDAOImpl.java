@@ -145,7 +145,7 @@ public class ghDAOImpl implements ghDAO {
 			throw new DuplicateIDException(cust.getuId() + " 는 이미 등록된 고객입니다.");
 			
 		} catch(SQLException e) {
-			throw new DMLException("고객 등록 중 Error가 발생하였습니다. | insertCustomer Error");
+			throw new DMLException("Insert Error로 인하여 고객 등록 실패하였습니다.");
 		} finally {
 			closeAll(ps, conn);
 		}
@@ -159,7 +159,6 @@ public class ghDAOImpl implements ghDAO {
 		// TODO Auto-generated method stub
 
 		try {
-
 			String updateQuery = "UPDATE user SET u_name = ?, birthday = ?, u_gender = ?, phnum = ? WHERE u_id = ?";
 
 			conn = getConnect();
@@ -189,16 +188,38 @@ public class ghDAOImpl implements ghDAO {
             System.out.println(cust.getName() + "님의 정보가 수정 완료 되었습니다.");
 			
 		} catch (SQLException e) {
-			throw new DMLException(cust.getName() + " 오류로 인하여 정보 수정 실패하였습니다.");
+			throw new DMLException(cust.getName() + "님 Update Error로 인하여 정보 수정 실패하였습니다.");
 		} finally {
-				closeAll(ps, conn);
+			closeAll(ps, conn);
 		}
 	}
 
 	@Override
 	public void deleteCustomer(String uId) throws SQLException, IDNotFoundException {
-		// TODO Auto-generated method stub
 
+		Connection conn = null;
+		PreparedStatement ps = null;
+		
+		try {
+			String deleteQuery = "DELETE FROM user WHERE u_id = ?";
+			
+			conn = getConnect();
+			ps = conn.prepareStatement(deleteQuery);
+			ps.setString(1, uId);
+			
+			int row = ps.executeUpdate();
+            if (row == 0) {
+                throw new IDNotFoundException(uId + " 라는 ID를 찾을 수 없어, 삭제 실패했습니다.");
+            } 
+            
+            System.out.println(uId + "님의 정보 삭제 완료하였습니다.");
+			
+		} catch (SQLException e) {
+			throw new DMLException("Delete Error로 인하여 " + uId + "의 고객 삭제 실패하였습니다.");
+			
+		}finally {
+			closeAll(ps, conn);
+		}
 	}
 
 	@Override

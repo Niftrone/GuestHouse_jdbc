@@ -28,9 +28,21 @@ public class ghTest {
 //		}
 		
 		// Update CHECK
+//		try {
+//			gh.updateCustomer(new Customer(
+//					"c777","Kingstone2","010-1111-3333",LocalDate.of(1996, 01, 13),"M"));
+//		} catch (Exception e) {
+//			System.out.println(e.getMessage());
+//			
+//		}
+		
+		// Delete CHECK
 		try {
+
+			gh.deleteCustomer("c777");
 			gh.updateCustomer(new Customer(
 					"c777","Kingstone2","010-1111-3333",LocalDate.of(1996, 01, 13),"M"));
+
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			
