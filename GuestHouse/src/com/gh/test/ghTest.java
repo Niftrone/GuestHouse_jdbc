@@ -67,6 +67,17 @@ public class ghTest {
 					new Customer("C035", "임재현","01011110035",  LocalDate.of(1988,10,15), "M")
 					));
 		} catch (Exception e) {
+			System.out.println(e.getMessage());	
+		}
+
+		try {
+			gh.deleteGH("GH022");
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		try {
+			gh.deleteGH("GH011");
+		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
 	}

@@ -20,7 +20,7 @@ public interface ghDAO {
 	Customer getCustomer(String uId) throws  SQLException, IDNotFoundException;
 	ArrayList<GuestHouse> getAllGH() throws SQLException;
 	ArrayList<GuestHouse> getAllGH(String region) throws SQLException;
-	ArrayList<Room> getAvailableRoom(LocalDate date, String gender) throws SQLException;
+	ArrayList<Room> getAvailableRoom(LocalDate sDate, LocalDate eDate, String gender) throws SQLException;
 	void insertReservation(Reservation rs) throws SQLException, DuplicateIDException;
 	Reservation getReservation(String uId) throws SQLException;
 	void updateReservation(Reservation rv) throws SQLException, IDNotFoundException;
