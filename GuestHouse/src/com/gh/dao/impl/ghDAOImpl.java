@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -71,28 +72,36 @@ public class ghDAOImpl implements ghDAO {
 	}
 
 	private int discountedPrice(Reservation rv) {
-		int days = rv.geteDate().getDayOfMonth() - rv.getsDate().getDayOfMonth();
-		double discount = 0.0;
+	    long days = ChronoUnit.DAYS.between(rv.getsDate(), rv.geteDate());
+	    if (days <= 0) return 0; // 날짜 오류 방지
 
-		DiscountInfo info = discountInfo.get(rv.getRvId());
+	    double discount = 0.0;
 
-		if (info != null) {
-			boolean over = !(rv.geteDate().isBefore(info.sDate) || rv.getsDate().isAfter(info.eDate));
-			if (over) {
-				discount = info.rate;
-			}
-		}
+	    DiscountInfo info = discountInfo.get(rv.getRvId());
+	    if (info != null) {
+	        boolean over = !(rv.geteDate().isBefore(info.sDate) || rv.getsDate().isAfter(info.eDate));
+	        if (over) {
+	            discount = info.rate;
+	        }
+	    }
 
-		return (int) (rv.getRoom().getPrice() * days * (1 - discount) * rv.getCount());
-
+	    int unitPrice = rv.getRoom().getPrice();
+	    int totalPrice = (int) (unitPrice * days * rv.getCount() * (1 - discount));
+	    return totalPrice;
 	}
+
 	
 	private boolean checkRepair(Reservation rv) {
 		RepairInfo info = repairInfo.get(rv.getRoom().getRmId());
-		if(rv.getsDate() == info.sDate || rv.geteDate() == info.eDate)
-			return true;
-
-		return !rv.getsDate().isBefore(info.sDate) && !rv.geteDate().isAfter(info.eDate);
+		
+		if(info != null) {
+			if(rv.getsDate() == info.sDate || rv.geteDate() == info.eDate)
+				return true;
+	
+			return !rv.getsDate().isBefore(info.sDate) && !rv.geteDate().isAfter(info.eDate);
+		}
+		
+		return false;
 	}
 
 	private Connection getConnect() throws SQLException {
@@ -345,6 +354,11 @@ public class ghDAOImpl implements ghDAO {
 			System.out.println("방의 수용인원보다 많은 인원입니다.");
 			return;
 		}
+		
+		if(checkRepair(rv)) {
+			System.out.println("해당 방은 공사 중입니다.");
+			return;
+		}
 			
 		try {
 			conn = getConnect();
@@ -361,7 +375,7 @@ public class ghDAOImpl implements ghDAO {
 			System.out.println(ps.executeUpdate() == 1 ? "예약 성공" : "예약 실패");
 			
 		} catch(SQLIntegrityConstraintViolationException e) {
-			throw new DuplicateIDException(e.getMessage());
+			throw new DuplicateIDException("중복된 예약 번호입니다.");
 		} catch(SQLException e) {
 			throw new DMLException(e.getMessage());
 		} finally {
@@ -401,13 +415,40 @@ public class ghDAOImpl implements ghDAO {
 
 	@Override
 	public void updateReservation(Reservation rv) throws SQLException, IDNotFoundException {
-		// TODO Auto-generated method stub
+		Connection conn = null;
+		PreparedStatement ps = null;
+		
+		if(checkRepair(rv)) {
+			System.out.println("해당 방은 공사 중입니다.");
+			return;
+		}
+		
+		try {
+			conn = getConnect();
+//			String query = "INSERT INTO reservation(rv_id, u_id, rm_id, rv_sdate, rv_edate, rv_price, count) VALUES (?,?,?,?,?,?,?) ";
+			String query = "UPDATE reservation SET u_id = ?, rm_id = ?, rv_sdate = ?, rv_edate = ?, rv_price = ?, count = ? WHERE rv_id = ?";
+	        
+	        ps = conn.prepareStatement(query);
+	        ps.setString(1, rv.getCust().getuId());
+	        ps.setString(2, rv.getRoom().getRmId());
+	        ps.setDate(3, java.sql.Date.valueOf(rv.getsDate()));
+	        ps.setDate(4, java.sql.Date.valueOf(rv.geteDate()));
+	        ps.setInt(5, discountedPrice(rv));
+	        ps.setInt(6, rv.getCount());
+	        ps.setString(7, rv.getRvId());
 
+	        System.out.println(ps.executeUpdate() == 1 ? "업데이트 성공" : "업데이트 실패");
+
+		} catch(SQLException e) {
+			throw new DMLException(e.getMessage());
+		} finally {
+			closeAll(ps, conn);
+		}
 	}
 
 	@Override
 	public void deleteReservation(String rvId) throws SQLException, IDNotFoundException {
-		// TODO Auto-generated method stub
+		
 
 	}
 
@@ -520,18 +561,36 @@ public class ghDAOImpl implements ghDAO {
 
 	@Override
 	public ArrayList<Reservation> getAllRV() throws SQLException {
-		// TODO Auto-generated method stub
+		ArrayList<Reservation> rvs = new ArrayList<>();
+		
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		try {
+			conn = getConnect();
+			String query = "SELECT * FROM reservation";
+			ps = conn.prepareStatement(query);
+			rs = ps.executeQuery();
+			
+			while(rs.next()) {
+				rvs.add(createRV(rs));
+			}
+			return rvs;
+		}catch(SQLException e) {
+			throw new DMLException(e.getMessage());
+		}
+		
+	}
+
+	@Override
+	public ArrayList<Reservation> getAllRV(LocalDate sDate, LocalDate eDate) throws SQLException {
+		
 		return null;
 	}
 
 	@Override
-	public ArrayList<Reservation> getAllRV(LocalDate date) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ArrayList<Reservation> getAllRV(LocalDate date, String ghId) throws SQLException {
+	public ArrayList<Reservation> getAllRV(LocalDate sDate, LocalDate eDate, String ghId) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}

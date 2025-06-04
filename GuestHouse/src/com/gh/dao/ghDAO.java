@@ -35,8 +35,8 @@ public interface ghDAO {
 	void repairRoom(String rmId, LocalDate sDate, LocalDate eDate);
 	void setEventGH(String ghId, LocalDate sDate, LocalDate eDate, double rate);
 	ArrayList<Reservation> getAllRV() throws SQLException;
-	ArrayList<Reservation> getAllRV(LocalDate date) throws SQLException;
-	ArrayList<Reservation> getAllRV(LocalDate date, String ghId) throws SQLException;
+	ArrayList<Reservation>  getAllRV(LocalDate sDate, LocalDate eDate) throws SQLException;
+	ArrayList<Reservation>  getAllRV(LocalDate sDate, LocalDate eDate, String ghId) throws SQLException;
 	ArrayList<Integer> getQuarterSale(String ghId, int year) throws SQLException;
 	int getMonthSale(int year, int month) throws SQLException;
 	String getSeasonalCount(int year) throws SQLException;
