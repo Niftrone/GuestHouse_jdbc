@@ -15,7 +15,6 @@ public class Customer extends User {
 		this.birthday = birthday;
 		this.gender = gender;
 	}
-
 	public Customer(String uId, String name, String phNum, LocalDate birthday, String gender,
 			ArrayList<GuestHouse> wishList, ArrayList<Reservation> rvList) {
 		this(uId, name, phNum, birthday, gender);
@@ -26,31 +25,24 @@ public class Customer extends User {
 	public LocalDate getBirthday() {
 		return birthday;
 	}
-
 	public void setBirthday(LocalDate birthday) {
 		this.birthday = birthday;
 	}
-
 	public String getGender() {
 		return gender;
 	}
-
 	public void setGender(String gender) {
 		this.gender = gender;
 	}
-
 	public ArrayList<GuestHouse> getWishList() {
 		return wishList;
 	}
-
 	public void setWishList(ArrayList<GuestHouse> wishList) {
 		this.wishList = wishList;
 	}
-
 	public ArrayList<Reservation> getRvList() {
 		return rvList;
 	}
-
 	public void setRvList(ArrayList<Reservation> rvList) {
 		this.rvList = rvList;
 	}

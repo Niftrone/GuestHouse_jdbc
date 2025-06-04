@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -71,28 +72,36 @@ public class ghDAOImpl implements ghDAO {
 	}
 
 	private int discountedPrice(Reservation rv) {
-		int days = rv.geteDate().getDayOfMonth() - rv.getsDate().getDayOfMonth();
-		double discount = 0.0;
+	    long days = ChronoUnit.DAYS.between(rv.getsDate(), rv.geteDate());
+	    if (days <= 0) return 0; // 날짜 오류 방지
 
-		DiscountInfo info = discountInfo.get(rv.getRvId());
+	    double discount = 0.0;
 
-		if (info != null) {
-			boolean over = !(rv.geteDate().isBefore(info.sDate) || rv.getsDate().isAfter(info.eDate));
-			if (over) {
-				discount = info.rate;
-			}
-		}
+	    DiscountInfo info = discountInfo.get(rv.getRvId());
+	    if (info != null) {
+	        boolean over = !(rv.geteDate().isBefore(info.sDate) || rv.getsDate().isAfter(info.eDate));
+	        if (over) {
+	            discount = info.rate;
+	        }
+	    }
 
-		return (int) (rv.getRoom().getPrice() * days * (1 - discount) * rv.getCount());
-
+	    int unitPrice = rv.getRoom().getPrice();
+	    int totalPrice = (int) (unitPrice * days * rv.getCount() * (1 - discount));
+	    return totalPrice;
 	}
+
 	
 	private boolean checkRepair(Reservation rv) {
 		RepairInfo info = repairInfo.get(rv.getRoom().getRmId());
-		if(rv.getsDate() == info.sDate || rv.geteDate() == info.eDate)
-			return true;
-
-		return !rv.getsDate().isBefore(info.sDate) && !rv.geteDate().isAfter(info.eDate);
+		
+		if(info != null) {
+			if(rv.getsDate() == info.sDate || rv.geteDate() == info.eDate)
+				return true;
+	
+			return !rv.getsDate().isBefore(info.sDate) && !rv.geteDate().isAfter(info.eDate);
+		}
+		
+		return false;
 	}
 
 	private Connection getConnect() throws SQLException {
@@ -125,6 +134,46 @@ public class ghDAOImpl implements ghDAO {
 							);
 		return rv;
 	}
+	
+	private boolean isRoomAvailable(String rmId, LocalDate sDate, LocalDate eDate, int count, String gender, Connection conn) throws SQLException {
+	    int p = Period.between(sDate, eDate).getDays();
+
+	    for (int i = 0; i < p; i++) {
+	        String query = """
+	            SELECT CASE 
+	                     WHEN SUM(rv.count) >= rm.capacity 
+	                          AND SUM(rv.count) + ? > rm.capacity 
+	                     THEN rv.rm_id 
+	                     ELSE NULL 
+	                   END fullrmId
+	              FROM reservation rv, user u, room rm
+	             WHERE rv.u_id = u.u_id
+	               AND rv.rm_id = rm.rm_id
+	               AND u.u_gender = ?
+	               AND ? >= rv_sdate
+	               AND ? < rv_edate
+	               AND rv.rm_id = ?
+	             GROUP BY rv.rm_id
+	        """;
+
+	        try (PreparedStatement ps = conn.prepareStatement(query)) {
+	            ps.setInt(1, count);
+	            ps.setString(2, gender);
+	            ps.setDate(3, java.sql.Date.valueOf(sDate.plusDays(i)));
+	            ps.setDate(4, java.sql.Date.valueOf(sDate.plusDays(i)));
+	            ps.setString(5, rmId);
+
+	            try (ResultSet rs = ps.executeQuery()) {
+	                if (rs.next() && rs.getString("fullrmId") != null) {
+	                    return false; // 하루라도 꽉 찬 경우 예약 불가
+	                }
+	            }
+	        }
+	    }
+
+	    return true; // 모든 날짜에 예약 가능
+	}
+
 
 	/// 비즈니스 로직 ///
 	// 자바의 date를 sql date로 변환하는 함수를 따로 만들어야 하는가?
@@ -346,54 +395,87 @@ public class ghDAOImpl implements ghDAO {
 		}
 		return ghs;
 	}
-
+	
+	
 	@Override
-
 	public ArrayList<String> getAvailableRoom(LocalDate sDate, LocalDate eDate, String gender, int count) throws SQLException {
-		ArrayList<String> fullrms = new ArrayList<String>(); // 해당 일자에 예약이 다 찬 방을 담을 ArrayList
-		ArrayList<String> rooms = new ArrayList<String>(); // 성별이 같은 방 목록을 담을 ArrayList
-		Connection conn = null;
-		PreparedStatement ps1 = null;
-		PreparedStatement ps2 = null;
-		ResultSet rs1 = null;
-		ResultSet rs2 = null;
-		int p = Period.between(sDate, eDate).getDays();
-		try {
-			conn = getConnect();
-			for(int i=0; i<p; i++) {
-				String query1 = "SELECT CASE WHEN sum(rv.count) >= rm.capacity AND sum(rv.count)+? > rm.capacity THEN rv.rm_id ELSE NULL END fullrmId FROM reservation rv,  user u, room rm WHERE rv.u_id = u.u_id AND rv.rm_id = rm.rm_id AND u.u_gender=? AND (?>=rv_sdate AND ?<rv_edate) GROUP BY rv.rm_id";
-				ps1 = conn.prepareStatement(query1);
-				ps1.setInt(1, count);
-				ps1.setString(2, gender);
-				ps1.setDate(3, java.sql.Date.valueOf(sDate.plusDays(i)));
-				ps1.setDate(4, java.sql.Date.valueOf(sDate.plusDays(i)));
-				rs1 = ps1.executeQuery();
-				while(rs1.next()) {
-					if(rs1.getString("fullrmId") != null && !fullrms.contains(rs1.getString("fullrmId")))
-						fullrms.add(rs1.getString("fullrmId"));
-				}
-//				System.out.println(sDate.plusDays(i));
-//				fullrms.stream().forEach(r->System.out.print(r));
-			}
-			String query2 = "SELECT rm_id FROM room WHERE rm_gender=?";
-			ps2 = conn.prepareStatement(query2);
-			ps2.setString(1, gender);
-			rs2 = ps2.executeQuery();
-			while(rs2.next()) {
-				rooms.add(rs2.getString("rm_id"));
-			}
-//			rooms.stream().forEach(r->System.out.print(r+" "));
-			if(fullrms.size() != 0) {
-				for(String r : fullrms) {
-					rooms.remove(r);
-				}
-			}
-		} finally {
-			closeAll(rs1, ps1, null);
-			closeAll(rs2, ps2, null);
-		}
-		return rooms;
+	    ArrayList<String> availableRooms = new ArrayList<>();
+	    Connection conn = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
+
+	    try {
+	        conn = getConnect();
+
+	        // 해당 성별과 일치하는 모든 방 조회
+	        String query = "SELECT rm_id FROM room WHERE rm_gender = ?";
+	        ps = conn.prepareStatement(query);
+	        ps.setString(1, gender);
+	        rs = ps.executeQuery();
+
+	        // 각 방이 예약 가능한지 확인
+	        while (rs.next()) {
+	            String rmId = rs.getString("rm_id");
+
+	            // 현재 방이 해당 날짜에 예약 가능하면 리스트에 추가
+	            if (isRoomAvailable(rmId, sDate, eDate, count, gender, conn)) {
+	                availableRooms.add(rmId);
+	            }
+	        }
+
+	    } finally {
+	        closeAll(rs, ps, conn);
+	    }
+
+	    return availableRooms;
 	}
+
+//	@Override
+//	public ArrayList<String> getAvailableRoom(LocalDate sDate, LocalDate eDate, String gender, int count) throws SQLException {
+//		ArrayList<String> fullrms = new ArrayList<String>(); // 해당 일자에 예약이 다 찬 방을 담을 ArrayList
+//		ArrayList<String> rooms = new ArrayList<String>(); // 성별이 같은 방 목록을 담을 ArrayList
+//		Connection conn = null;
+//		PreparedStatement ps1 = null;
+//		PreparedStatement ps2 = null;
+//		ResultSet rs1 = null;
+//		ResultSet rs2 = null;
+//		int p = Period.between(sDate, eDate).getDays();
+//		try {
+//			conn = getConnect();
+//			for(int i=0; i<p; i++) {
+//				String query1 = "SELECT CASE WHEN sum(rv.count) >= rm.capacity AND sum(rv.count)+? > rm.capacity THEN rv.rm_id ELSE NULL END fullrmId FROM reservation rv,  user u, room rm WHERE rv.u_id = u.u_id AND rv.rm_id = rm.rm_id AND u.u_gender=? AND (?>=rv_sdate AND ?<rv_edate) GROUP BY rv.rm_id";
+//				ps1 = conn.prepareStatement(query1);
+//				ps1.setInt(1, count);
+//				ps1.setString(2, gender);
+//				ps1.setDate(3, java.sql.Date.valueOf(sDate.plusDays(i)));
+//				ps1.setDate(4, java.sql.Date.valueOf(sDate.plusDays(i)));
+//				rs1 = ps1.executeQuery();
+//				while(rs1.next()) {
+//					if(rs1.getString("fullrmId") != null && !fullrms.contains(rs1.getString("fullrmId")))
+//						fullrms.add(rs1.getString("fullrmId"));
+//				}
+////				System.out.println(sDate.plusDays(i));
+////				fullrms.stream().forEach(r->System.out.print(r));
+//			}
+//			String query2 = "SELECT rm_id FROM room WHERE rm_gender=?";
+//			ps2 = conn.prepareStatement(query2);
+//			ps2.setString(1, gender);
+//			rs2 = ps2.executeQuery();
+//			while(rs2.next()) {
+//				rooms.add(rs2.getString("rm_id"));
+//			}
+////			rooms.stream().forEach(r->System.out.print(r+" "));
+//			if(fullrms.size() != 0) {
+//				for(String r : fullrms) {
+//					rooms.remove(r);
+//				}
+//			}
+//		} finally {
+//			closeAll(rs1, ps1, null);
+//			closeAll(rs2, ps2, null);
+//		}
+//		return rooms;
+//	}
 
 	@Override
 	public void insertReservation(Reservation rv) throws SQLException, DuplicateIDException  {
@@ -405,9 +487,20 @@ public class ghDAOImpl implements ghDAO {
 			System.out.println("방의 수용인원보다 많은 인원입니다.");
 			return;
 		}
+		
+		if(checkRepair(rv)) {
+			System.out.println("해당 방은 공사 중입니다.");
+			return;
+		}
 			
 		try {
 			conn = getConnect();
+			
+			if (!isRoomAvailable(rv.getRoom().getRmId(), rv.getsDate(), rv.geteDate(), rv.getCount(), rv.getCust().getGender(), conn)) {
+			    System.out.println("해당 날짜에 방이 꽉 찼습니다.");
+			    return;
+			}
+			
 			String query = "INSERT INTO reservation(rv_id, u_id, rm_id, rv_sdate, rv_edate, rv_price, count) VALUES (?,?,?,?,?,?,?) ";
 			ps = conn.prepareStatement(query);
 			ps.setString(1, rv.getRvId());
@@ -421,7 +514,7 @@ public class ghDAOImpl implements ghDAO {
 			System.out.println(ps.executeUpdate() == 1 ? "예약 성공" : "예약 실패");
 			
 		} catch(SQLIntegrityConstraintViolationException e) {
-			throw new DuplicateIDException(e.getMessage());
+			throw new DuplicateIDException("중복된 예약 번호입니다.");
 		} catch(SQLException e) {
 			throw new DMLException(e.getMessage());
 		} finally {
@@ -461,13 +554,40 @@ public class ghDAOImpl implements ghDAO {
 
 	@Override
 	public void updateReservation(Reservation rv) throws SQLException, IDNotFoundException {
-		// TODO Auto-generated method stub
+		Connection conn = null;
+		PreparedStatement ps = null;
+		
+		if(checkRepair(rv)) {
+			System.out.println("해당 방은 공사 중입니다.");
+			return;
+		}
+		
+		try {
+			conn = getConnect();
+//			String query = "INSERT INTO reservation(rv_id, u_id, rm_id, rv_sdate, rv_edate, rv_price, count) VALUES (?,?,?,?,?,?,?) ";
+			String query = "UPDATE reservation SET u_id = ?, rm_id = ?, rv_sdate = ?, rv_edate = ?, rv_price = ?, count = ? WHERE rv_id = ?";
+	        
+	        ps = conn.prepareStatement(query);
+	        ps.setString(1, rv.getCust().getuId());
+	        ps.setString(2, rv.getRoom().getRmId());
+	        ps.setDate(3, java.sql.Date.valueOf(rv.getsDate()));
+	        ps.setDate(4, java.sql.Date.valueOf(rv.geteDate()));
+	        ps.setInt(5, discountedPrice(rv));
+	        ps.setInt(6, rv.getCount());
+	        ps.setString(7, rv.getRvId());
 
+	        System.out.println(ps.executeUpdate() == 1 ? "업데이트 성공" : "업데이트 실패");
+
+		} catch(SQLException e) {
+			throw new DMLException(e.getMessage());
+		} finally {
+			closeAll(ps, conn);
+		}
 	}
 
 	@Override
 	public void deleteReservation(String rvId) throws SQLException, IDNotFoundException {
-		// TODO Auto-generated method stub
+		
 
 	}
 
@@ -641,18 +761,36 @@ public class ghDAOImpl implements ghDAO {
 
 	@Override
 	public ArrayList<Reservation> getAllRV() throws SQLException {
-		// TODO Auto-generated method stub
+		ArrayList<Reservation> rvs = new ArrayList<>();
+		
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		try {
+			conn = getConnect();
+			String query = "SELECT * FROM reservation";
+			ps = conn.prepareStatement(query);
+			rs = ps.executeQuery();
+			
+			while(rs.next()) {
+				rvs.add(createRV(rs));
+			}
+			return rvs;
+		}catch(SQLException e) {
+			throw new DMLException(e.getMessage());
+		}
+		
+	}
+
+	@Override
+	public ArrayList<Reservation> getAllRV(LocalDate sDate, LocalDate eDate) throws SQLException {
+		
 		return null;
 	}
 
 	@Override
-	public ArrayList<Reservation> getAllRV(LocalDate date) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ArrayList<Reservation> getAllRV(LocalDate date, String ghId) throws SQLException {
+	public ArrayList<Reservation> getAllRV(LocalDate sDate, LocalDate eDate, String ghId) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -671,8 +809,25 @@ public class ghDAOImpl implements ghDAO {
 
 	@Override
 	public String getSeasonalCount(int year) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		String ans = "";
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			conn = getConnect();
+			String query = "SELECT SUM(CASE WHEN YEAR(rv_sdate) = ? AND MONTH(rv_sdate) IN (6, 7, 8) THEN count ELSE 0 END) AS summer, SUM(CASE WHEN (YEAR(rv_sdate) = ? AND MONTH(rv_sdate) = 12) OR (YEAR(rv_sdate) = ? AND MONTH(rv_sdate) IN (1, 2)) THEN count ELSE 0 END) AS winter FROM reservation";
+			ps = conn.prepareStatement(query);
+			ps.setInt(1, year);
+			ps.setInt(2, year);
+			ps.setInt(3, year+1);
+			rs = ps.executeQuery();
+			if(rs.next()) {
+				ans = year%100+" Summer : "+String.valueOf(rs.getInt("summer"))+" / "+year%100+(year%100+1)+" Winter : "+String.valueOf(rs.getInt("winter"));
+			}
+		} finally {
+			closeAll(rs, ps, conn);
+		}
+		return ans;
 	}
 
 	@Override
