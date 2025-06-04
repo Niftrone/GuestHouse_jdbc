@@ -98,6 +98,12 @@ public class ghTest {
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		}
+		try {
+			System.out.println("=====2023-08-24 ~ 2023-08-26 사이에 예약 가능한 F 방 목록 조회=====");
+			// reservation 테이블에 ('RV101', 'C001', 'RM057', '2023-08-24', '2023-08-26', 124000, 1) 데이터 추가
+			gh.getAvailableRoom(LocalDate.of(2023, 8, 24) , LocalDate.of(2023, 8, 26), "F", 1).stream().forEach(r-> System.out.print(r+"\t"));
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
 	}
-		
 }
