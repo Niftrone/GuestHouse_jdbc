@@ -348,7 +348,6 @@ public class ghDAOImpl implements ghDAO {
 	}
 
 	@Override
-
 	public ArrayList<String> getAvailableRoom(LocalDate sDate, LocalDate eDate, String gender, int count) throws SQLException {
 		ArrayList<String> fullrms = new ArrayList<String>(); // 해당 일자에 예약이 다 찬 방을 담을 ArrayList
 		ArrayList<String> rooms = new ArrayList<String>(); // 성별이 같은 방 목록을 담을 ArrayList
