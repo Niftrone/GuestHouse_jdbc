@@ -3,16 +3,27 @@ package com.gh.vo;
 public class Room {
 	private String rmId; // 컬럼명 rm_id
 	private GuestHouse gh; // 컬럼명 gh_id
+	private String ghId; // 컬럼명 gh_id
 	private String name; // 컬럼명 rm_name
 	private String gender; // 컬럼명 rm_gender
 	private int price; // 컬럼명 rm_price
 	private int capacity;
 	
+	public Room() {	}
 	
-	public Room() {
-		
+	// DB용 생성자
+	public Room(String rmId, String ghId, String name, String gender, int price, int capacity) {
+		this.rmId = rmId;
+		this.ghId = ghId;
+		this.name = name;
+		this.gender = gender;
+		this.price = price;
+		this.capacity = capacity;
 	}
-	
+	public Room(String rmId) {
+		this.rmId = rmId;
+	}
+	// Java용 생성자
 	public Room(String rmId, GuestHouse gh, String name, String gender, int price, int capacity) {
 		this.rmId = rmId;
 		this.gh = gh;
@@ -68,6 +79,14 @@ public class Room {
 
 	public void setGh(GuestHouse gh) {
 		this.gh = gh;
+	}
+
+	public String getGhId() {
+		return gh.getName();
+	}
+
+	public void setGhId(String ghId) {
+		this.ghId = ghId;
 	}
 
 	@Override
