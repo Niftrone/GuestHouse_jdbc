@@ -14,9 +14,9 @@ import com.gh.vo.Room;
 
 public interface ghDAO {
 	//client
-	void insertCustomer(Customer cust) throws  DMLException, DuplicateIDException;
-	void updateCustomer(Customer cust) throws  DMLException, IDNotFoundException;
-	void deleteCustomer(String uId) throws  DMLException, IDNotFoundException;
+	void insertCustomer(Customer cust) throws  SQLException, DuplicateIDException;
+	void updateCustomer(Customer cust) throws  SQLException, IDNotFoundException;
+	void deleteCustomer(String uId) throws  SQLException, IDNotFoundException;
 	Customer getCustomer(String uId) throws  DMLException, IDNotFoundException;
 	ArrayList<GuestHouse> getAllGH() throws DMLException;
 	ArrayList<GuestHouse> getAllGH(String region) throws DMLException;

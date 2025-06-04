@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
@@ -113,16 +114,84 @@ public class ghDAOImpl implements ghDAO {
 	}
 
 	/// 비즈니스 로직 ///
+	// 자바의 date를 sql date로 변환하는 함수를 따로 만들어야 하는가?
 	@Override
-	public void insertCustomer(Customer cust) throws DMLException, DuplicateIDException {
-		// TODO Auto-generated method stub
-
+	public void insertCustomer(Customer cust) throws SQLException, DuplicateIDException {
+		
+		Connection conn = null;
+		PreparedStatement ps = null;
+		
+		try {
+			String insertQuery = "INSERT INTO user (u_id, u_name, birthday, u_gender, phnum, u_region) VALUES (?, ?, ?, ?, ?, ?)";
+			
+			conn = getConnect();
+			ps = conn.prepareStatement(insertQuery);
+			ps.setString(1, cust.getuId());
+			ps.setString(2, cust.getName());
+			ps.setDate(3, java.sql.Date.valueOf(cust.getBirthday()));
+            ps.setString(4, cust.getGender());      
+            ps.setString(5, cust.getPhNum());       
+            // 고객이 추가될 때, 지역은 삽입하지 않는다.
+            ps.setNull(6, java.sql.Types.VARCHAR); 
+				
+            int row = ps.executeUpdate();
+            if(row != 1) {
+            	throw new DMLException(cust.getName() + "님의 고객 등록이 실패하였습니다.");
+            }
+            
+            System.out.println(cust.getName() + "님의 등록이 완료 되었습니다.");
+			
+		} catch (SQLIntegrityConstraintViolationException e) {
+			throw new DuplicateIDException(cust.getuId() + " 는 이미 등록된 고객입니다.");
+			
+		} catch(SQLException e) {
+			throw new DMLException("고객 등록 중 Error가 발생하였습니다. | insertCustomer Error");
+		} finally {
+			closeAll(ps, conn);
+		}
+		
 	}
 
 	@Override
-	public void updateCustomer(Customer cust) throws DMLException, IDNotFoundException {
-		// TODO Auto-generated method stub
+	public void updateCustomer(Customer cust) throws SQLException, IDNotFoundException {
+		Connection conn = null;
+		PreparedStatement ps = null;
 
+		try {
+
+			String updateQuery = "UPDATE user SET u_name = ?, birthday = ?, u_gender = ?, phnum = ? WHERE u_id = ?";
+
+			conn = getConnect();
+			ps = conn.prepareStatement(updateQuery);
+
+            // --- birthday 유효성 검사 추가 ---
+//            if (cust.getBirthday() == null) {
+//                // birthday가 null이면 에러 발생
+//                throw new IllegalArgumentException("고객의 생년월일 정보는 필수 입력 사항입니다.");
+//            }
+			
+			ps.setString(1, cust.getName());
+			ps.setDate(2, java.sql.Date.valueOf(cust.getBirthday()));
+			ps.setString(3, cust.getGender());
+			ps.setString(4, cust.getPhNum());
+
+			// user id 입력
+			ps.setString(5, cust.getuId());
+			
+            int row = ps.executeUpdate();
+            
+            // Record가 추가 되지 않으면 IDNotFoundException
+            if (row == 0) {
+                throw new IDNotFoundException(cust.getuId() + " 고객 ID가 존재하지 않아 정보 수정이 실패했습니다.");
+            } 
+            
+            System.out.println(cust.getName() + "님의 정보가 수정 완료 되었습니다.");
+			
+		} catch (SQLException e) {
+			throw new DMLException(cust.getName() + " 오류로 인하여 정보 수정 실패하였습니다.");
+		} finally {
+				closeAll(ps, conn);
+		}
 	}
 
 	@Override
