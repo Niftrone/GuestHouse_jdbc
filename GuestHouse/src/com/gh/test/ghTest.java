@@ -69,5 +69,23 @@ public class ghTest {
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
+		try {
+			System.out.println("=====전체 게스트하우스 목록 조회=====");
+			gh.getAllGH().stream().forEach(g->System.out.println(g));
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		try {
+			System.out.println("=====서울 지역 전체 게스트하우스 목록 조회=====");
+			gh.getAllGH("Seoul").stream().forEach(g->System.out.println(g));
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		try {
+			System.out.println("=====부산 지역 전체 게스트하우스 목록 조회=====");
+			gh.getAllGH("Busan").stream().forEach(g->System.out.println(g));
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
 	}
 }

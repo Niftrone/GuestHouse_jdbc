@@ -207,15 +207,44 @@ public class ghDAOImpl implements ghDAO {
 	}
 
 	@Override
-	public ArrayList<GuestHouse> getAllGH() throws DMLException {
-		// TODO Auto-generated method stub
-		return null;
+	public ArrayList<GuestHouse> getAllGH() throws SQLException {
+		ArrayList<GuestHouse> ghs = new ArrayList<GuestHouse>();
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			conn = getConnect();
+			String query = "SELECT * FROM guesthouse";
+			ps = conn.prepareStatement(query);
+			rs = ps.executeQuery();
+			while(rs.next()) {
+				ghs.add(new GuestHouse(rs.getString("gh_id"), rs.getString("gh_name"), rs.getString("gh_region")));
+			}
+		} finally {
+			closeAll(rs, ps, conn);
+		}
+		return ghs;
 	}
 
 	@Override
-	public ArrayList<GuestHouse> getAllGH(String region) throws DMLException {
-		// TODO Auto-generated method stub
-		return null;
+	public ArrayList<GuestHouse> getAllGH(String region) throws SQLException {
+		ArrayList<GuestHouse> ghs = new ArrayList<GuestHouse>();
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			conn = getConnect();
+			String query = "SELECT * FROM guesthouse WHERE gh_region=?";
+			ps = conn.prepareStatement(query);
+			ps.setString(1, region);
+			rs = ps.executeQuery();
+			while(rs.next()) {
+				ghs.add(new GuestHouse(rs.getString("gh_id"), rs.getString("gh_name"), rs.getString("gh_region")));
+			}
+		} finally {
+			closeAll(rs, ps, conn);
+		}
+		return ghs;
 	}
 
 	@Override
