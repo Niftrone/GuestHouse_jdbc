@@ -497,7 +497,7 @@ public class ghDAOImpl implements ghDAO {
 			conn = getConnect();
 			
 			if (!isRoomAvailable(rv.getRoom().getRmId(), rv.getsDate(), rv.geteDate(), rv.getCount(), rv.getCust().getGender(), conn)) {
-			    System.out.println("해당 날짜에 방이 꽉 찼습니다.");
+			    System.out.println("예약을 진행할수 없습니다.");
 			    return;
 			}
 			
@@ -564,7 +564,12 @@ public class ghDAOImpl implements ghDAO {
 		
 		try {
 			conn = getConnect();
-//			String query = "INSERT INTO reservation(rv_id, u_id, rm_id, rv_sdate, rv_edate, rv_price, count) VALUES (?,?,?,?,?,?,?) ";
+
+			if (!isRoomAvailable(rv.getRoom().getRmId(), rv.getsDate(), rv.geteDate(), rv.getCount(), rv.getCust().getGender(), conn)) {
+			    System.out.println("예약을 진행할수 없습니다.");
+			    return;
+			}
+
 			String query = "UPDATE reservation SET u_id = ?, rm_id = ?, rv_sdate = ?, rv_edate = ?, rv_price = ?, count = ? WHERE rv_id = ?";
 	        
 	        ps = conn.prepareStatement(query);
@@ -587,7 +592,28 @@ public class ghDAOImpl implements ghDAO {
 
 	@Override
 	public void deleteReservation(String rvId) throws SQLException, IDNotFoundException {
-		
+		Connection conn = null;
+		PreparedStatement ps = null;
+
+		try{
+			conn = getConnect();
+			String query = "DELETE FROM reservation WHERE rv_id = ?";
+
+			ps = conn.prepareStatement(query);
+			ps.setString(1, rvId);
+
+			int result = ps.executeUpdate();
+			if(result == 1){
+				System.out.println("예약 삭제 완료");
+			}else{
+				throw new IDNotFoundException("해당 예약 번호가 없습니다.");
+			}
+
+		} catch (SQLException e) {
+			throw new DMLException(e.getMessage());
+		} finally{
+			closeAll(ps, conn);
+		}
 
 	}
 
@@ -785,13 +811,37 @@ public class ghDAOImpl implements ghDAO {
 
 	@Override
 	public ArrayList<Reservation> getAllRV(LocalDate sDate, LocalDate eDate) throws SQLException {
-		
-		return null;
+		ArrayList<Reservation> rvs = new ArrayList<>();
+
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		try{
+			conn = getConnect();
+			String query = "SELECT * FROM reservation WHERE rv_sdate >= ? AND rv_edate <= ?";
+
+			ps = conn.prepareStatement(query);
+			ps.setDate(1, java.sql.Date.valueOf(sDate));
+			ps.setDate(2, java.sql.Date.valueOf(eDate));
+
+			rs = ps.executeQuery();
+			
+			while (rs.next()) {
+				rvs.add(createRV(rs));
+			}
+
+		} catch (SQLException e) {
+			throw new DMLException(e.getMessage());
+		} finally {
+			closeAll(rs, ps, conn);
+		}
+		return rvs;
 	}
 
 	@Override
-	public ArrayList<Reservation> getAllRV(LocalDate sDate, LocalDate eDate, String ghId) throws SQLException {
-		// TODO Auto-generated method stub
+	public ArrayList<Reservation> getAllRV(LocalDate sDate, LocalDate eDate, String ghId) throws SQLExceptistubon {
+
 		return null;
 	}
 
