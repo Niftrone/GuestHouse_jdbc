@@ -130,7 +130,6 @@ public class ghDAOImpl implements ghDAO {
 	// 자바의 date를 sql date로 변환하는 함수를 따로 만들어야 하는가?
 	@Override
 	public void insertCustomer(Customer cust) throws SQLException, DuplicateIDException {
-		
 		Connection conn = null;
 		PreparedStatement ps = null;
 		
@@ -169,8 +168,7 @@ public class ghDAOImpl implements ghDAO {
 	public void updateCustomer(Customer cust) throws SQLException, IDNotFoundException {
 		Connection conn = null;
 		PreparedStatement ps = null;
-		// TODO Auto-generated method stub
-
+		
 		try {
 			String updateQuery = "UPDATE user SET u_name = ?, birthday = ?, u_gender = ?, phnum = ? WHERE u_id = ?";
 
@@ -237,8 +235,33 @@ public class ghDAOImpl implements ghDAO {
 
 	@Override
 	public Customer getCustomer(String uId) throws SQLException, IDNotFoundException {
-		// TODO Auto-generated method stub
-		return null;
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		Customer customer = null;
+		
+		try {
+			conn = getConnect();
+			String selectQuery = "SELECT u_id, u_name, birthday, u_gender, phnum FROM user WHERE u_id = ?";
+			ps = conn.prepareStatement(selectQuery);
+			ps.setString(1, uId);
+			rs = ps.executeQuery();
+			
+			if (rs.next()) {
+				customer = new Customer(uId, 
+										rs.getString("u_name"), 
+										rs.getString("phnum"),
+										rs.getDate("birthday").toLocalDate(), 
+										rs.getString("u_gender"));
+			} else {
+				throw new IDNotFoundException(uId + " 라는 ID를 찾을 수 없어 고객 정보 불러오기 실패하였습니다.");
+			}
+			
+		} catch (SQLException e) {
+			throw new DMLException("getCustomer Error로 인하여 " + uId + "의 고객 정보 불러오기 실패하였습니다.");
+		}
+		
+		return customer;
 	}
 
 	@Override

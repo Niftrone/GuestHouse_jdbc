@@ -32,16 +32,58 @@ public class ghTest {
 //		}
 		
 		// Delete CHECK
-		try {
+//		try {
+//			gh.deleteCustomer("c777");
+//			gh.updateCustomer(new Customer(
+//					"c777","Kingstone2","010-1111-3333",LocalDate.of(1996, 01, 13),"M"));
+//
+//		} catch (Exception e) {
+//			System.out.println(e.getMessage());
+//			
+//		}
+		
+		// getCustomer
+//		try {
+//			System.out.println(gh.getCustomer("c777"));
+//		} catch (Exception e) {
+//			System.out.println(e.getMessage());
+//			
+//		}
+		
+//		try {
+//			gh.insertGH(new GuestHouse("GH010", "윤슬하우스", "Busan"));
+//		} catch (Exception e) {
+//			System.out.println(e.getMessage());
+//		}
+//		try {
+//			gh.insertGH(new GuestHouse("GH011", "윤슬하우스", "Busan"));
+//		} catch (Exception e) {
+//			System.out.println(e.getMessage());
+//		}
+//
+//		try {
+//			gh.updateGH(new GuestHouse("GH022", "윤슬하우스2", "Busan"));
+//		} catch (Exception e) {
+//			System.out.println(e.getMessage());
+//		}
+//		try {
+//			gh.updateGH(new GuestHouse("GH011", "윤슬하우스", "Seoul"));
+//		} catch (Exception e) {
+//			System.out.println(e.getMessage());
+//		}
+//		
+//		try {
 
-			gh.deleteCustomer("c777");
-			gh.updateCustomer(new Customer(
-					"c777","Kingstone2","010-1111-3333",LocalDate.of(1996, 01, 13),"M"));
+// 		try {
 
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
+// 			gh.deleteCustomer("c777");
+// 			gh.updateCustomer(new Customer(
+// 					"c777","Kingstone2","010-1111-3333",LocalDate.of(1996, 01, 13),"M"));
+
+// 		} catch (Exception e) {
+// 			System.out.println(e.getMessage());
 			
-		}
+// 		}
 
 //		
 //		try {
@@ -67,6 +109,7 @@ public class ghTest {
 //		}
 		
 //		try {
+
 //			gh.insertReservation(new Reservation(
 //					"RV081", LocalDate.of(2025, 06, 12), LocalDate.of(2025, 06, 15), 2, 
 //					new Room("RM001",
@@ -89,29 +132,29 @@ public class ghTest {
 //			System.out.println(e.getMessage());
 //		}
 		
-		try {
-			System.out.println(gh.getReservation("C010"));
-		}catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		try {
-			System.out.println("=====전체 게스트하우스 목록 조회=====");
-			gh.getAllGH().stream().forEach(g->System.out.println(g));
-		} catch (SQLException e) {
-			System.out.println(e.getMessage());
-		}
-		try {
-			System.out.println("=====서울 지역 전체 게스트하우스 목록 조회=====");
-			gh.getAllGH("Seoul").stream().forEach(g->System.out.println(g));
-		} catch (SQLException e) {
-			System.out.println(e.getMessage());
-		}
-		try {
-			System.out.println("=====부산 지역 전체 게스트하우스 목록 조회=====");
-			gh.getAllGH("Busan").stream().forEach(g->System.out.println(g));
-		} catch (SQLException e) {
-			System.out.println(e.getMessage());
-		}
+// 		try {
+// 			System.out.println(gh.getReservation("C010"));
+// 		}catch (Exception e) {
+// 			System.out.println(e.getMessage());
+// 		}
+// 		try {
+// 			System.out.println("=====전체 게스트하우스 목록 조회=====");
+// 			gh.getAllGH().stream().forEach(g->System.out.println(g));
+// 		} catch (SQLException e) {
+// 			System.out.println(e.getMessage());
+// 		}
+// 		try {
+// 			System.out.println("=====서울 지역 전체 게스트하우스 목록 조회=====");
+// 			gh.getAllGH("Seoul").stream().forEach(g->System.out.println(g));
+// 		} catch (SQLException e) {
+// 			System.out.println(e.getMessage());
+// 		}
+// 		try {
+// 			System.out.println("=====부산 지역 전체 게스트하우스 목록 조회=====");
+// 			gh.getAllGH("Busan").stream().forEach(g->System.out.println(g));
+// 		} catch (SQLException e) {
+// 			System.out.println(e.getMessage());
+// 		}
 	}
 		
 }
