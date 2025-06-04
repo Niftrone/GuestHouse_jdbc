@@ -9,19 +9,20 @@ public class Reservation {
 	private int price; // 컬럼명 rv_price
 	private int count;
 	private Room room;
+	private Customer cust;
 
 	public Reservation() {
 
 	}
 
-	public Reservation(String rvId, LocalDate sDate, LocalDate eDate, int price, int count, Room room) {
+	public Reservation(String rvId, LocalDate sDate, LocalDate eDate, int count, Room room, Customer cust) {
 		super();
 		this.rvId = rvId;
 		this.sDate = sDate;
 		this.eDate = eDate;
-		this.price = price;
 		this.count = count;
 		this.room = room;
+		this.cust = cust;
 	}
 
 	public String getRvId() {
@@ -72,9 +73,17 @@ public class Reservation {
 		this.room = room;
 	}
 
+	public Customer getCust() {
+		return cust;
+	}
+
+	public void setCust(Customer cust) {
+		this.cust = cust;
+	}
+
 	@Override
 	public String toString() {
-		return "Reservation [rvId=" + rvId + ", sDate=" + sDate + ", eDate=" + eDate + ", count =" + count + ", price=" + price + ", room=" + room + "]";
+		return "Reservation [rvId=" + rvId + ", sDate=" + sDate + ", eDate=" + eDate + ", count =" + count + ", price=" + price + ", room=" + room + ", customer=" + cust + "]";
 	}
 
 }
