@@ -340,9 +340,29 @@ public class ghDAOImpl implements ghDAO {
 	}
 
 	@Override
-	public void deleteGH(String ghId) throws DMLException, IDNotFoundException {
-		// TODO Auto-generated method stub
-
+	public void deleteGH(String ghId) throws SQLException, IDNotFoundException {
+		Connection conn = null;
+		PreparedStatement ps1 = null;
+		PreparedStatement ps2 = null;
+		ResultSet rs = null;
+		try {
+			conn = getConnect();
+			String selectQuery = "SELECT gh_id FROM guesthouse WHERE gh_id=?";
+			ps1 = conn.prepareStatement(selectQuery);
+			ps1.setString(1, ghId);
+			rs = ps1.executeQuery();
+			if(rs.next()) {
+				String deleteQuery = "DELETE FROM guesthouse WHERE gh_id =?";
+				ps2 = conn.prepareStatement(deleteQuery);
+				ps2.setString(1, ghId);
+				System.out.println(ps2.executeUpdate()+" 개 DELETE 성공...deleteGH()");
+			} else {
+				throw new IDNotFoundException("삭제하려는 게스트하우스는 없는 id 입니다.");
+			}
+		} finally {
+			closeAll(rs, ps1, conn);
+			closeAll(rs, ps2, conn);
+		}
 	}
 
 	@Override

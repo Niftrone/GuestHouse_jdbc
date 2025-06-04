@@ -31,7 +31,7 @@ public interface ghDAO {
 	//manager
 	void insertGH(GuestHouse gh) throws SQLException, DuplicateIDException;
 	void updateGH(GuestHouse gh) throws SQLException, IDNotFoundException;
-	void deleteGH(String ghId) throws DMLException, IDNotFoundException;
+	void deleteGH(String ghId) throws SQLException, IDNotFoundException;
 	void repairRoom(String rmId, LocalDate sDate, LocalDate eDate);
 	void setEventGH(String ghId, LocalDate sDate, LocalDate eDate, double rate);
 	ArrayList<Reservation> getAllRV() throws DMLException;
