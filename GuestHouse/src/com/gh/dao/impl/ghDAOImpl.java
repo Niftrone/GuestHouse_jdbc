@@ -69,7 +69,7 @@ public class ghDAOImpl implements ghDAO {
 	}
 
 	private int discountedPrice(Reservation rv) {
-		int days = rv.geteDate().getDayOfMonth() - rv.geteDate().getDayOfMonth();
+		int days = rv.geteDate().getDayOfMonth() - rv.getsDate().getDayOfMonth();
 		double discount = 0.0;
 
 		DiscountInfo info = discountInfo.get(rv.getRvId());
@@ -81,7 +81,7 @@ public class ghDAOImpl implements ghDAO {
 			}
 		}
 
-		return (int) (rv.getPrice() * days * (1 - discount) * rv.getCount());
+		return (int) (rv.getRoom().getPrice() * days * (1 - discount) * rv.getCount());
 
 	}
 	
