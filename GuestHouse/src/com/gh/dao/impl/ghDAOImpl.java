@@ -273,34 +273,31 @@ public class ghDAOImpl implements ghDAO {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		ArrayList<Customer> allCustomers = new ArrayList<Customer>();
-		
+
 		try {
 			String selectQuery = "SELECT u_id, u_name, birthday, u_gender, phnum FROM user";
 
 			conn = getConnect();
 			ps = conn.prepareStatement(selectQuery);
 			rs = ps.executeQuery();
-			
-			while(rs.next()) {
-				
-				// birthday 값을 java.sql.Date로 가져옵니다.
-                Date sqlBirthday = rs.getDate("birthday");
-                // 이 값을 LocalDate로 변환합니다. sqlBirthday가 null이면 NPE 발생
-                // birthday도 N/A로 하려 했더니 안됨.
-                LocalDate birthday = (sqlBirthday != null) ? sqlBirthday.toLocalDate() : null;
-                
-                // gender null일 경우 N/A (없다는 뜻임)
-                String gender = (rs.getString("u_gender") != null) ? rs.getString("u_gender") : "N/A";
 
-                
-                allCustomers.add(new Customer(
-						rs.getString("u_id"),
-                        rs.getString("u_name"),
-                        rs.getString("phnum"),
-                        birthday,
-                        gender));	
+			while (rs.next()) {
+				
+				// DB에 저장된 user Table의 birthday 값이 null일 경우 Error를 발생
+				// SQL문으로 IFNULL() 사용하여 처리하려 했지만 LocalDate에서 인식을 못하는 Error가 발생
+				// java에서 처리하기로 결정, birthday == null -> null or birthday != null -> rs.getDate()로 해결
+				LocalDate birthday = (rs.getDate("birthday") != null) ? rs.getDate("birthday").toLocalDate() : null;
+
+				// gender null일 경우 N/A (없다는 뜻임)
+				String gender = (rs.getString("u_gender") != null) ? rs.getString("u_gender") : "N/A";
+
+				allCustomers.add(new Customer(rs.getString("u_id"), 
+											  rs.getString("u_name"), 
+											  rs.getString("phnum"),
+											  birthday, 
+											  gender));
 			}
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
