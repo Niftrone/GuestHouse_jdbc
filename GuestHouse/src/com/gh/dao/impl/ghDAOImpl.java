@@ -840,9 +840,34 @@ public class ghDAOImpl implements ghDAO {
 	}
 
 	@Override
-	public ArrayList<Reservation> getAllRV(LocalDate sDate, LocalDate eDate, String ghId) throws SQLExceptistubon {
+	public ArrayList<Reservation> getAllRV(LocalDate sDate, LocalDate eDate, String ghId) throws SQLException {
+		ArrayList<Reservation> rvs = new ArrayList<>();
 
-		return null;
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		try{
+			conn = getConnect();
+			String query = "SELECT * FROM reservation WHERE rv_sdate >= ? AND rv_edate <= ? AND gh_id = ?";
+
+			ps = conn.prepareStatement(query);
+			ps.setDate(1, java.sql.Date.valueOf(sDate));
+			ps.setDate(2, java.sql.Date.valueOf(eDate));
+			ps.setString(3, ghId);
+
+			rs = ps.executeQuery();
+			
+			while (rs.next()) {
+				rvs.add(createRV(rs));
+			}
+
+		} catch (SQLException e) {
+			throw new DMLException(e.getMessage());
+		} finally {
+			closeAll(rs, ps, conn);
+		}
+		return rvs;
 	}
 
 	@Override
