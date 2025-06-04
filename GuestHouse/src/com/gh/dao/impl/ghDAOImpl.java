@@ -242,9 +242,31 @@ public class ghDAOImpl implements ghDAO {
 	}
 
 	@Override
-	public void updateGH(GuestHouse gh) throws DMLException, IDNotFoundException {
-		// TODO Auto-generated method stub
-
+	public void updateGH(GuestHouse gh) throws SQLException, IDNotFoundException {
+		Connection conn = null;
+		PreparedStatement ps1 = null;
+		PreparedStatement ps2 = null;
+		ResultSet rs = null;
+		try {
+			conn = getConnect();
+			String selectQuery = "SELECT gh_id FROM guesthouse WHERE gh_id=?";
+			ps1 = conn.prepareStatement(selectQuery);
+			ps1.setString(1, gh.getGhId());
+			rs = ps1.executeQuery();
+			if(rs.next()) {
+				String updateQuery = "UPDATE guesthouse SET gh_name=?, gh_region=? WHERE gh_id =?";
+				ps2 = conn.prepareStatement(updateQuery);
+				ps2.setString(1, gh.getName());
+				ps2.setString(2, gh.getRegion());
+				ps2.setString(3, gh.getGhId());
+				System.out.println(ps2.executeUpdate()+" 개 UPDATE 성공...updateGH()");
+			} else {
+				throw new IDNotFoundException("수정하려는 게스트하우스는 없는 id 입니다.");
+			}
+		} finally {
+			closeAll(rs, ps1, conn);
+			closeAll(rs, ps2, conn);
+		}
 	}
 
 	@Override
