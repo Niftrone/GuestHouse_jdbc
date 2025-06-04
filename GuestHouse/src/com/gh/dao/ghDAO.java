@@ -1,5 +1,6 @@
 package com.gh.dao;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -19,7 +20,7 @@ public interface ghDAO {
 	Customer getCustomer(String uId) throws  DMLException, IDNotFoundException;
 	ArrayList<GuestHouse> getAllGH() throws DMLException;
 	ArrayList<GuestHouse> getAllGH(String region) throws DMLException;
-	ArrayList<Room> getAvailableRoom(LocalDate date, String gender) throws DMLException;
+	ArrayList<Room> getAvailableRoom(LocalDate sDate, LocalDate eDate, String gender) throws DMLException;
 	void insertReservation(Customer cust, Room room, LocalDate sDate, LocalDate eDate) throws DMLException;
 	Reservation getReservation(String uId) throws DMLException;
 	void updateReservation(Reservation rv) throws DMLException, IDNotFoundException;
@@ -28,7 +29,7 @@ public interface ghDAO {
 	void deleteWishList(String uId, String ghId) throws DMLException, IDNotFoundException;
 	
 	//manager
-	void insertGH(GuestHouse gh) throws DMLException, DuplicateIDException;
+	void insertGH(GuestHouse gh) throws SQLException, DuplicateIDException;
 	void updateGH(GuestHouse gh) throws DMLException, IDNotFoundException;
 	void deleteGH(String ghId) throws DMLException, IDNotFoundException;
 	void repairRoom(String rmId, LocalDate sDate, LocalDate eDate);

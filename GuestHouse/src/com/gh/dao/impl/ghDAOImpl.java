@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -148,9 +149,32 @@ public class ghDAOImpl implements ghDAO {
 	}
 
 	@Override
-	public ArrayList<Room> getAvailableRoom(LocalDate date, String gender) throws DMLException {
-		// TODO Auto-generated method stub
-		return null;
+	public ArrayList<Room> getAvailableRoom(LocalDate sDate, LocalDate eDate, String gender) throws DMLException {
+		ArrayList<Room> rooms = new ArrayList<Room>();
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+//		LocalDate sDate = LocalDate.of(2025, 6, 1);
+//		LocalDate eDate = LocalDate.of(2025, 6, 3);
+		Period period = Period.between(sDate, eDate);
+		int p = period.getDays();
+		try {
+			for(int i=0; i<p; i++) {
+				
+			}
+//			conn = getConnect();
+//			// 서브쿼리에서 예약 시작일부터 종료일까지 예약 내역에서 rm_id 의 SUM(예약 count) 과 rm_id의 capacity를 비교해야 함
+//			String query = "SELECT * FROM room WHERE rm_gender=? AND rm_id IN (SELECT rm_id FROM reservation GROUP BY id_rm, rv_sdate)";
+//			ps = conn.prepareStatement(query);
+//			ps.setString(1, gender);
+//			rs = ps.executeQuery();
+//			while(rs.next()) {
+//				rooms.add(new Room(rs.getString("rm_id"), rs.getString("rm_name"), rs.getString("rm_gender"), rs.getInt("rm_price"), rs.getInt("capacity")));
+//			}
+		} finally {
+//			closeAll(rs, ps, conn);
+		}
+		return rooms;
 	}
 
 	@Override
@@ -190,9 +214,31 @@ public class ghDAOImpl implements ghDAO {
 	}
 
 	@Override
-	public void insertGH(GuestHouse gh) throws DMLException, DuplicateIDException {
-		// TODO Auto-generated method stub
-
+	public void insertGH(GuestHouse gh) throws SQLException, DuplicateIDException {
+		Connection conn = null;
+		PreparedStatement ps1 = null;
+		PreparedStatement ps2 = null;
+		ResultSet rs = null;
+		try {
+			conn = getConnect();
+			String selectQuery = "SELECT gh_id FROM guesthouse WHERE gh_id=?";
+			ps1 = conn.prepareStatement(selectQuery);
+			ps1.setString(1, gh.getGhId());
+			rs = ps1.executeQuery();
+			if(!rs.next()) {
+				String insertQuery = "INSERT INTO guesthouse (gh_id, gh_name, gh_region) VALUES (?,?,?)";
+				ps2 = conn.prepareStatement(insertQuery);
+				ps2.setString(1, gh.getGhId());
+				ps2.setString(2, gh.getName());
+				ps2.setString(3, gh.getRegion());
+				System.out.println(ps2.executeUpdate()+" 개 INSERT 성공...insertGH()");
+			} else {
+				throw new DuplicateIDException("추가하려는 게스트하우스의 아이디는 이미 등록되어 있어 추가할 수 없습니다.");
+			}
+		} finally {
+			closeAll(rs, ps1, conn);
+			closeAll(rs, ps2, conn);
+		}
 	}
 
 	@Override
