@@ -43,12 +43,11 @@ public class ghTest {
 //		}
 		
 		// getCustomer
-//		try {
-//			System.out.println(gh.getCustomer("c777"));
-//		} catch (Exception e) {
-//			System.out.println(e.getMessage());
-//			
-//		}
+			try {
+				System.out.println(gh.getAllCustomer());
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
 		
 //		try {
 //			gh.insertGH(new GuestHouse("GH010", "윤슬하우스", "Busan"));

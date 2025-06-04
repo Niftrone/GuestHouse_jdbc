@@ -1,6 +1,7 @@
 package com.gh.dao.impl;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,7 +21,6 @@ import com.gh.vo.Customer;
 import com.gh.vo.GuestHouse;
 import com.gh.vo.Reservation;
 import com.gh.vo.Room;
-
 import config.ServerInfo;
 
 public class ghDAOImpl implements ghDAO {
@@ -241,8 +241,9 @@ public class ghDAOImpl implements ghDAO {
 		Customer customer = null;
 		
 		try {
-			conn = getConnect();
 			String selectQuery = "SELECT u_id, u_name, birthday, u_gender, phnum FROM user WHERE u_id = ?";
+			
+			conn = getConnect();
 			ps = conn.prepareStatement(selectQuery);
 			ps.setString(1, uId);
 			rs = ps.executeQuery();
@@ -259,9 +260,50 @@ public class ghDAOImpl implements ghDAO {
 			
 		} catch (SQLException e) {
 			throw new DMLException("getCustomer Error로 인하여 " + uId + "의 고객 정보 불러오기 실패하였습니다.");
+		} finally {
+			closeAll(rs, ps, conn);
 		}
 		
 		return customer;
+	}
+	
+	@Override
+	public ArrayList<Customer> getAllCustomer() throws SQLException {
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		ArrayList<Customer> allCustomers = new ArrayList<Customer>();
+
+		try {
+			String selectQuery = "SELECT u_id, u_name, birthday, u_gender, phnum FROM user";
+
+			conn = getConnect();
+			ps = conn.prepareStatement(selectQuery);
+			rs = ps.executeQuery();
+
+			while (rs.next()) {
+				
+				// DB에 저장된 user Table의 birthday 값이 null일 경우 Error를 발생
+				// SQL문으로 IFNULL() 사용하여 처리하려 했지만 LocalDate에서 인식을 못하는 Error가 발생
+				// java에서 처리하기로 결정, birthday == null -> null or birthday != null -> rs.getDate()로 해결
+				LocalDate birthday = (rs.getDate("birthday") != null) ? rs.getDate("birthday").toLocalDate() : null;
+
+				// gender null일 경우 N/A (없다는 뜻임)
+				String gender = (rs.getString("u_gender") != null) ? rs.getString("u_gender") : "N/A";
+
+				allCustomers.add(new Customer(rs.getString("u_id"), 
+											  rs.getString("u_name"), 
+											  rs.getString("phnum"),
+											  birthday, 
+											  gender));
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			closeAll(rs, ps, conn);
+		}
+		return allCustomers;
 	}
 
 	@Override
