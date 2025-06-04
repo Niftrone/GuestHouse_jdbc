@@ -18,6 +18,7 @@ public interface ghDAO {
 	void updateCustomer(Customer cust) throws  SQLException, IDNotFoundException;
 	void deleteCustomer(String uId) throws  SQLException, IDNotFoundException;
 	Customer getCustomer(String uId) throws  SQLException, IDNotFoundException;
+	ArrayList<Customer> getAllCustomer() throws  SQLException;
 	ArrayList<GuestHouse> getAllGH() throws SQLException;
 	ArrayList<GuestHouse> getAllGH(String region) throws SQLException;
 	ArrayList<Room> getAvailableRoom(LocalDate sDate, LocalDate eDate, String gender) throws SQLException;
