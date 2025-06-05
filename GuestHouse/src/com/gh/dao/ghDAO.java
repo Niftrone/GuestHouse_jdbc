@@ -12,7 +12,7 @@ import com.gh.vo.Customer;
 import com.gh.vo.GuestHouse;
 import com.gh.vo.Reservation;
 
-public interface GHDAO {
+public interface ghDAO {
 	//client
 	void insertCustomer(Customer cust) throws  SQLException, DuplicateIDException;
 	void updateCustomer(Customer cust) throws  SQLException, IDNotFoundException;
