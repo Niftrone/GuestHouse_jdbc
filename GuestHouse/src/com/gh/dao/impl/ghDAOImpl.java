@@ -12,6 +12,7 @@ import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.gh.dao.ghDAO;
@@ -22,6 +23,7 @@ import com.gh.vo.Customer;
 import com.gh.vo.GuestHouse;
 import com.gh.vo.Reservation;
 import com.gh.vo.Room;
+
 import config.ServerInfo;
 
 public class ghDAOImpl implements ghDAO {
@@ -524,8 +526,8 @@ public class ghDAOImpl implements ghDAO {
 	}
 
 	@Override
-	public Reservation getReservation(String uId) throws SQLException {
-		Reservation rv = null;
+	public ArrayList<Reservation> getReservation(String uId) throws SQLException {
+		ArrayList<Reservation> rvs = new ArrayList<>();
 		
 		Connection conn = null;
 		PreparedStatement ps = null;
@@ -539,10 +541,10 @@ public class ghDAOImpl implements ghDAO {
 			ps.setString(1, uId);
 			rs = ps.executeQuery();
 			
-			if(rs.next()) {
-				rv = createRV(rs);
+			while(rs.next()) {
+				rvs.add(createRV(rs));
 			}
-			return rv;
+			return rvs;
 			
 		}catch(SQLException e) {
 			throw new DMLException(e.getMessage()); 
@@ -849,7 +851,13 @@ public class ghDAOImpl implements ghDAO {
 
 		try{
 			conn = getConnect();
-			String query = "SELECT * FROM reservation WHERE rv_sdate >= ? AND rv_edate <= ? AND gh_id = ?";
+			String query = """
+							SELECT * FROM reservation r
+							LEFT JOIN room rm ON r.rm_id = rm.rm_id
+							WHERE rv_sdate >= ? 
+							AND rv_edate <= ? 
+							AND gh_id = ?
+							""";
 
 			ps = conn.prepareStatement(query);
 			ps.setDate(1, java.sql.Date.valueOf(sDate));
@@ -871,15 +879,84 @@ public class ghDAOImpl implements ghDAO {
 	}
 
 	@Override
-	public ArrayList<Integer> getQuarterSale(String ghId, int year) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+	public Map<String, Integer> getQuarterSale(String ghId, int year) throws SQLException {
+		Map<String, Integer> sales = new HashMap<>();
+
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		try {
+			conn = getConnect();
+			String query = """
+							SELECT CASE
+									WHEN month(rv_sdate) BETWEEN 1 AND 3 THEN 'Q1'
+									WHEN month(rv_sdate) BETWEEN 4 AND 6 THEN 'Q2'
+									WHEN month(rv_sdate) BETWEEN 7 AND 9 THEN 'Q3'
+									WHEN month(rv_sdate) BETWEEN 10 AND 12 THEN 'Q4'
+							        END quarter,
+							        SUM(rv_price) as total
+							FROM reservation r
+							LEFT JOIN room rm ON r.rm_id = rm.rm_id
+							WHERE gh_id = ?
+							AND year(rv_sdate) = ?
+							GROUP BY 1;
+						   """;
+			ps = conn.prepareStatement(query);
+			ps.setString(1, ghId);
+			ps.setInt(2, year);
+			rs = ps.executeQuery();
+			
+			while(rs.next()) {
+				sales.put(rs.getString("quarter"), rs.getInt("total"));
+			}
+			
+	        for (String q : List.of("Q1", "Q2", "Q3", "Q4")) {
+	            sales.putIfAbsent(q, 0);
+	        }
+			
+		}catch(SQLException e) {
+			throw new DMLException(e.getMessage());
+		}finally {
+			closeAll(rs, ps, conn);
+		}
+		
+		return sales;
 	}
 
 	@Override
 	public int getMonthSale(int year, int month) throws SQLException {
-		// TODO Auto-generated method stub
-		return 0;
+		int total_price = 0;
+		
+		LocalDate start = LocalDate.of(year, month, 1);
+		LocalDate end = start.plusMonths(1);
+		
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		try {
+			conn = getConnect();
+			String query = """
+						   SELECT sum(rv_price) as total FROM reservation 
+						   WHERE rv_sdate >= ? AND rv_sdate < ?
+						   """;
+			ps = conn.prepareStatement(query);
+			ps.setDate(1, Date.valueOf(start));
+			ps.setDate(2, Date.valueOf(end));
+			rs = ps.executeQuery();
+			
+			if (rs.next()) {
+			    total_price = rs.getObject("total") != null ? rs.getInt("total") : 0;
+			}
+			
+		} catch(SQLException e) {
+			throw new DMLException(e.getMessage());
+		} finally {
+			closeAll(rs, ps, conn);
+		}
+		
+		return total_price;
 	}
 
 	@Override
@@ -890,7 +967,22 @@ public class ghDAOImpl implements ghDAO {
 		ResultSet rs = null;
 		try {
 			conn = getConnect();
-			String query = "SELECT SUM(CASE WHEN YEAR(rv_sdate) = ? AND MONTH(rv_sdate) IN (6, 7, 8) THEN count ELSE 0 END) AS summer, SUM(CASE WHEN (YEAR(rv_sdate) = ? AND MONTH(rv_sdate) = 12) OR (YEAR(rv_sdate) = ? AND MONTH(rv_sdate) IN (1, 2)) THEN count ELSE 0 END) AS winter FROM reservation";
+			String query = """
+						   SELECT 
+						   SUM(CASE WHEN YEAR(rv_sdate) = ? 
+						   	   AND MONTH(rv_sdate) 
+						   	   IN (6, 7, 8) THEN count ELSE 0 END) 
+						   	   AS summer, 
+						   SUM(CASE WHEN (YEAR(rv_sdate) = ? 
+						   	   AND MONTH(rv_sdate) = 12) 
+						   	   OR (YEAR(rv_sdate) = ? 
+						   	   AND MONTH(rv_sdate) 
+						   	   IN (1, 2)) 
+						   	   THEN count ELSE 0 END) 
+						   	   AS winter 
+						   FROM reservation
+					""";
+			
 			ps = conn.prepareStatement(query);
 			ps.setInt(1, year);
 			ps.setInt(2, year);

@@ -280,6 +280,30 @@ public class ghTest {
 	// 	} catch (SQLException e) {
 	// 		System.out.println(e.getMessage());
 	// 	}
+		
+//		try {
+//			System.out.println(gh.getAllRV(LocalDate.of(2023, 8, 24) , LocalDate.of(2023, 9, 30)));
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		}
+//		try {
+//			System.out.println(gh.getAllRV(LocalDate.of(2023, 8, 24) , LocalDate.of(2023, 9, 30), "GH010"));
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		}
+		
+		try {
+			System.out.println(gh.getQuarterSale("GH010", 2023));
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+//		try {
+//			System.out.println(gh.getMonthSale(2023, 1));
+//		} catch (SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 
 	}
 }
