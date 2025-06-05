@@ -165,7 +165,6 @@ public class GHDAOImpl implements GHDAO {
 	}
 
 	/// 비즈니스 로직 ///
-	// 자바의 date를 sql date로 변환하는 함수를 따로 만들어야 하는가?
 	@Override
 	public void insertCustomer(Customer cust) throws SQLException, DuplicateIDException {
 		Connection conn = null;
@@ -209,7 +208,6 @@ public class GHDAOImpl implements GHDAO {
 		
 		try {
 			String updateQuery = "UPDATE user SET u_name = ?, birthday = ?, u_gender = ?, phnum = ? WHERE u_id = ?";
-
 			conn = getConnect();
 			ps = conn.prepareStatement(updateQuery);
 
@@ -218,7 +216,6 @@ public class GHDAOImpl implements GHDAO {
 //                // birthday가 null이면 에러 발생
 //                throw new IllegalArgumentException("고객의 생년월일 정보는 필수 입력 사항입니다.");
 //            }
-			
 			ps.setString(1, cust.getName());
 			ps.setDate(2, java.sql.Date.valueOf(cust.getBirthday()));
 			ps.setString(3, cust.getGender());
@@ -228,7 +225,6 @@ public class GHDAOImpl implements GHDAO {
 			ps.setString(5, cust.getuId());
 			
             int row = ps.executeUpdate();
-            
             // Record가 추가 되지 않으면 IDNotFoundException
             if (row == 0) {
                 throw new IDNotFoundException(cust.getuId() + " 고객 ID가 존재하지 않아 정보 수정이 실패했습니다.");
@@ -661,12 +657,8 @@ public class GHDAOImpl implements GHDAO {
 	@Override
 	public void insertWishList(String uId, String ghId) throws SQLException, IDNotFoundException, DuplicateIDException {
 		Connection conn = null;
-		
-		// SELECT 담당 PreparedStatement
-		PreparedStatement selectPs = null;
-		// INSERT 담당 PreparedStatement
-		PreparedStatement insertPs = null;
-		
+		PreparedStatement selectPs = null; // SELECT 담당 PreparedStatement
+		PreparedStatement insertPs = null; // INSERT 담당 PreparedStatement
 		ResultSet rs = null;
 		
 		try {
@@ -697,7 +689,6 @@ public class GHDAOImpl implements GHDAO {
 		} catch (SQLException e) {
 			throw new DMLException("데이터베이스 오류로 위시리스트 추가 실패 :  " + e.getMessage());
 		} finally {
-			// 내일 쌤께 여쭈어보자.
 			closeAll(rs, insertPs, conn);
 			closeAll(rs, selectPs, conn);
 		}
@@ -717,9 +708,7 @@ public class GHDAOImpl implements GHDAO {
 			ps.setString(2, ghId);
 			ps.executeUpdate();
 			
-			// 내일 무조건 출력 안되게 하기
 			System.out.println("고객 " + uId + "의 위시리스트에 " + ghId + "가 삭제되었습니다.");
-			
 			
 		} catch (SQLIntegrityConstraintViolationException e) {
 			throw new IDNotFoundException("존재하지 않는 사용자 ID(" + uId + ") 또는 게스트하우스 ID(" + ghId + ")로 WishList 삭제 실패.");
