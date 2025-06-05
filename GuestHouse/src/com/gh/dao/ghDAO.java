@@ -3,8 +3,8 @@ package com.gh.dao;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Map;
 
-import com.gh.exception.DMLException;
 import com.gh.exception.DuplicateIDException;
 import com.gh.exception.IDNotFoundException;
 import com.gh.vo.Customer;
@@ -23,10 +23,10 @@ public interface ghDAO {
 	ArrayList<GuestHouse> getAllGH(String region) throws SQLException;
 	ArrayList<String> getAvailableRoom(LocalDate sDate, LocalDate eDate, String gender, int count) throws SQLException;
 	void insertReservation(Reservation rs) throws SQLException, DuplicateIDException;
-	Reservation getReservation(String uId) throws SQLException;
+	ArrayList<Reservation> getReservation(String uId) throws SQLException;
 	void updateReservation(Reservation rv) throws SQLException, IDNotFoundException;
 	void deleteReservation(String rvId) throws SQLException, IDNotFoundException;
-	void insertWishList(String uId, String ghId) throws SQLException, IDNotFoundException;
+	void insertWishList(String uId, String ghId) throws SQLException, IDNotFoundException, DuplicateIDException;
 	void deleteWishList(String uId, String ghId) throws SQLException, IDNotFoundException;
 	ArrayList<GuestHouse> getWishList(String uId) throws SQLException;
 	
@@ -39,7 +39,7 @@ public interface ghDAO {
 	ArrayList<Reservation> getAllRV() throws SQLException;
 	ArrayList<Reservation>  getAllRV(LocalDate sDate, LocalDate eDate) throws SQLException;
 	ArrayList<Reservation>  getAllRV(LocalDate sDate, LocalDate eDate, String ghId) throws SQLException;
-	ArrayList<Integer> getQuarterSale(String ghId, int year) throws SQLException;
+	Map<String, Integer> getQuarterSale(String ghId, int year) throws SQLException;
 	int getMonthSale(int year, int month) throws SQLException;
 	String getSeasonalCount(int year) throws SQLException;
 	ArrayList<GuestHouse> getPopularGH(String region) throws  SQLException;
