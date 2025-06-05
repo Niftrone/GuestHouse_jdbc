@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.gh.dao.ghDAO;
+import com.gh.dao.GHDAO;
 import com.gh.exception.DMLException;
 import com.gh.exception.DuplicateIDException;
 import com.gh.exception.IDNotFoundException;
@@ -26,12 +26,12 @@ import com.gh.vo.Room;
 
 import config.ServerInfo;
 
-public class ghDAOImpl implements ghDAO {
+public class GHDAOImpl implements GHDAO {
 
 	/// 싱글톤 ///
 	// Test 클래스의 static 안이 아니라 생성자 안에서 드라이버 로딩 시키기
-	private static ghDAOImpl dao = new ghDAOImpl("127.0.0.1");
-	private ghDAOImpl(String serverIp) {
+	private static GHDAOImpl dao = new GHDAOImpl("127.0.0.1");
+	private GHDAOImpl(String serverIp) {
 		try {
 			Class.forName(ServerInfo.DRIVER_NAME);
 			System.out.println("드라이버 로딩 성공...");
@@ -39,7 +39,7 @@ public class ghDAOImpl implements ghDAO {
 			System.out.println(e.getMessage());
 		}
 	}
-	public static ghDAOImpl getInstance() {
+	public static GHDAOImpl getInstance() {
 		return dao;
 	}
 
