@@ -316,12 +316,12 @@ public class ghTest {
 //		}
 
 		
-//		try {
-//			System.out.println(gh.getQuarterSale("GH010", 2023));
-//		} catch (SQLException e) {
-//			e.printStackTrace();
-//		}
-//		// getCustomer
+		try {
+			System.out.println(gh.getQuarterSale("GH010", 2023));
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		// getCustomer
 //		try {
 //			System.out.println("=====C001 고객의 정보 조회1(예약 내역과 찜 목록 포함)=====");
 //			System.out.println(gh.getCustomer("C001"));
