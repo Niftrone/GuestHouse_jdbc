@@ -911,9 +911,9 @@ public class ghDAOImpl implements ghDAO {
 				sales.put(rs.getString("quarter"), rs.getInt("total"));
 			}
 			
-	        for (String q : List.of("Q1", "Q2", "Q3", "Q4")) {
-	            sales.putIfAbsent(q, 0);
-	        }
+			for(String q : List.of("Q1", "Q2", "Q3", "Q4")) {
+				sales.putIfAbsent(q, 0);
+			}
 			
 		}catch(SQLException e) {
 			throw new DMLException(e.getMessage());
