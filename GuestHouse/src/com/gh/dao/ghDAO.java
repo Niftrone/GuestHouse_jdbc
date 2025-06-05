@@ -43,6 +43,6 @@ public interface ghDAO {
 	Map<String, Integer> getQuarterSale(String ghId, int year) throws SQLException;
 	int getMonthSale(int year, int month) throws SQLException;
 	String getSeasonalCount(int year) throws SQLException;
-	ArrayList<GuestHouse> getPopularGH(String region) throws  SQLException;
+	Map<Integer, GuestHouse> getPopularGH(String region) throws  SQLException;
 	String getGenderRatio(String ghId, int year, int month) throws SQLException;
 }

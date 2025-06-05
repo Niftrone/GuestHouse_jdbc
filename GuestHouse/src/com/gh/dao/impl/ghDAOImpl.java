@@ -1,5 +1,6 @@
 package com.gh.dao.impl;
 
+import java.lang.reflect.Array;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -1034,9 +1035,50 @@ public class ghDAOImpl implements ghDAO {
 	}
 
 	@Override
-	public ArrayList<GuestHouse> getPopularGH(String region) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+	public Map<Integer, GuestHouse> getPopularGH(String region) throws SQLException {
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		Map<Integer, GuestHouse> popularGHList = new HashMap<>();
+		
+		try {
+			/*
+			 *  각 게스트하우스별 예약 건수를 바탕으로 1~5위 까지 순위를 매긴다.
+			 *  DENSE_RANK()을 통해서 순위가 공동이어도 1,1,2,3,4,5 이런식으로 순위가 매겨진다.
+			 *  중복 값이 발생될 수 있기에, 2차적으로 게하별 매출을 비교하여 순위를 반드시 중복없이 매기도록 한다.
+			 */
+			String selectQuery = "SELECT gh_id, gh_name, gh_region, total_reservations, total_sales, ranking"
+					+ "			  FROM (SELECT gh.gh_id, gh.gh_name, gh.gh_region, COUNT(r.rv_id) AS total_reservations, SUM(r.rv_price) AS total_sales,"
+					+ "			  		DENSE_RANK() OVER(PARTITION BY gh.gh_region ORDER BY COUNT(r.rv_id) DESC, SUM(r.rv_price) DESC) AS ranking"
+					+ "			  		FROM guesthouse gh"
+					+ "			  		LEFT JOIN room rm ON gh.gh_id = rm.gh_id"
+					+ "			  		LEFT JOIN reservation r ON rm.rm_id = r.rm_id"
+					+ "			  		WHERE gh.gh_region = ?"
+					+ "			  		GROUP BY gh.gh_id, gh.gh_name, gh.gh_region) AS ranked_gh"
+					+ "			  ORDER BY ranking ASC, total_reservations DESC, gh_id ASC"
+					+ "			  LIMIT 5";
+			
+			conn = getConnect();
+			ps = conn.prepareStatement(selectQuery);
+			ps.setString(1, region);
+			rs = ps.executeQuery();
+			
+			while(rs.next()) {
+				popularGHList.put(
+								  rs.getInt("ranking"),
+								  new GuestHouse(
+								  rs.getString("gh_id"),
+								  rs.getString("gh_name"),
+								  rs.getString("gh_region")));
+			}
+			
+		} catch (SQLException e) {
+			throw new DMLException("인기 게스트하우스 정보를 불러오는 데 실패하였습니다.");
+		} finally {
+			closeAll(rs, ps, conn);
+		}
+		return popularGHList;
 	}
 
 	@Override
