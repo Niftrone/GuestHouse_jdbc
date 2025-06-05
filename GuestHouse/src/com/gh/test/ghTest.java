@@ -96,18 +96,30 @@ public class ghTest {
 //		} catch (Exception e) {
 //			System.out.println(e.getMessage());
 //		}
+		gh.setEventGH("GH010", LocalDate.of(2022, 8, 24) , LocalDate.of(2025, 9, 30), 0.1);
+//		
+		try {
+			gh.deleteReservation("RV083");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IDNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-//		try {
-//	        gh.insertReservation(new Reservation(
-//	            "RV082", LocalDate.of(2025, 06, 20), LocalDate.of(2025, 06, 21), 2, 
-//	            new Room("RM001",
-//	                new GuestHouse("GH001", "소담하우스", "Seoul")
-//	                ,"햇살방", "F", 55000, 2),
-//	            new Customer("C035", "임재현","01011110035",  LocalDate.of(1988,10,15), "M")
-//	            ));
-//        } catch(Exception e) {
-//            System.out.println(e.getMessage());
-//        }
+		
+		try {
+	        gh.insertReservation(new Reservation(
+	            "RV083", LocalDate.of(2025, 06, 20), LocalDate.of(2025, 06, 21), 1, 
+	            new Room("RM073",
+	                new GuestHouse("GH010", "별빛하우스", "Seoul")
+	                ,"별헤는방", "F", 63000, 1),
+	            new Customer("C035", "임재현","01011110035",  LocalDate.of(1988,10,15), "F")
+	            ));
+        } catch(Exception e) {
+            System.out.println(e.getMessage());
+        }
 		
 
 //		try {
@@ -171,11 +183,11 @@ public class ghTest {
 
 //		try {
 //			gh.updateReservation(new Reservation(
-//					"RV081", LocalDate.of(2025, 06, 11), LocalDate.of(2025, 06, 16), 2, 
-//					new Room("RM001",
+//					"RV081", LocalDate.of(2023, 03, 11), LocalDate.of(2023, 03, 16), 2, 
+//					new Room("RM040",
 //							new GuestHouse("GH001", "소담하우스", "Seoul")
 //							,"햇살방", "F", 55000, 2),
-//					new Customer("C035", "임재현","01011110035",  LocalDate.of(1988,10,15), "M")
+//					new Customer("C035", "임재현","01011110035",  LocalDate.of(1988,10,15), "F")
 //					));
 //			
 //		} catch (Exception e) {
@@ -291,12 +303,12 @@ public class ghTest {
 //		} catch (SQLException e) {
 //			e.printStackTrace();
 //		}
-		
-		try {
-			System.out.println(gh.getQuarterSale("GH010", 2023));
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+
+//		try {
+//			System.out.println(gh.getQuarterSale("GH010", 2023));
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		}
 		
 //		try {
 //			System.out.println(gh.getMonthSale(2023, 1));

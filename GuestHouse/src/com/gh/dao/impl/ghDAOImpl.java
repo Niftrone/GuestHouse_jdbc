@@ -75,11 +75,13 @@ public class ghDAOImpl implements ghDAO {
 
 	private int discountedPrice(Reservation rv) {
 	    long days = ChronoUnit.DAYS.between(rv.getsDate(), rv.geteDate());
-	    if (days <= 0) return 0; // 날짜 오류 방지
+	    if (days <= 0) return 0;
 
 	    double discount = 0.0;
 
-	    DiscountInfo info = discountInfo.get(rv.getRvId());
+	    String ghId = rv.getRoom().getGh().getGhId();
+	    DiscountInfo info = discountInfo.get(ghId);
+
 	    if (info != null) {
 	        boolean over = !(rv.geteDate().isBefore(info.sDate) || rv.getsDate().isAfter(info.eDate));
 	        if (over) {
@@ -88,22 +90,16 @@ public class ghDAOImpl implements ghDAO {
 	    }
 
 	    int unitPrice = rv.getRoom().getPrice();
-	    int totalPrice = (int) (unitPrice * days * rv.getCount() * (1 - discount));
-	    return totalPrice;
+	    return (int) (unitPrice * days * rv.getCount() * (1 - discount));
 	}
 
 	
 	private boolean checkRepair(Reservation rv) {
-		RepairInfo info = repairInfo.get(rv.getRoom().getRmId());
-		
-		if(info != null) {
-			if(rv.getsDate() == info.sDate || rv.geteDate() == info.eDate)
-				return true;
-	
-			return !rv.getsDate().isBefore(info.sDate) && !rv.geteDate().isAfter(info.eDate);
-		}
-		
-		return false;
+	    RepairInfo info = repairInfo.get(rv.getRoom().getRmId());
+	    if (info == null) return false;
+
+	    // 날짜 겹침 판별
+	    return !(rv.geteDate().isBefore(info.sDate) || rv.getsDate().isAfter(info.eDate));
 	}
 
 	private Connection getConnect() throws SQLException {
