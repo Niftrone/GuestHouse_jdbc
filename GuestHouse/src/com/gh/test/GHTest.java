@@ -3,18 +3,32 @@ package com.gh.test;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
-import com.gh.dao.impl.ghDAOImpl;
+import com.gh.dao.impl.GHDAOImpl;
 import com.gh.exception.IDNotFoundException;
 import com.gh.vo.Customer;
 import com.gh.vo.GuestHouse;
 import com.gh.vo.Reservation;
 import com.gh.vo.Room;
 
-public class ghTest {
-
-	public static void main(String[] args) {
+public class GHTest implements Runnable {
+	
+	GHDAOImpl gh;
+	
+	public GHTest() throws Exception {
+		try {
+			gh = GHDAOImpl.getInstance();
+		} catch(Exception cnfe) {
+			System.out.println("GeHa Constructor : " + cnfe);
+		}
+	}
+	
+	public static void main(String[] args) throws Exception {
 		
-		ghDAOImpl gh = ghDAOImpl.getInstance();
+		GHDAOImpl gh = GHDAOImpl.getInstance();
+		GHTest geha = new GHTest();
+		Thread t = new Thread(geha);
+		t.start();
+		
 		//String uId, String name, String phNum, LocalDate birthday, String gender
 		
 //		try {
@@ -350,5 +364,20 @@ public class ghTest {
 //			e.printStackTrace();
 //		}
 
+	}
+
+	@Override
+	public void run() {
+		// 쓰레드가 작업하는 코드를 작성
+		// 실시간으로 reservation 테이블의 전체 정보를 가져와서 출력
+		while(true) {
+			try {
+				gh.getAllRV().stream().forEach(r->System.out.println(r));
+				System.out.println("@@@@@ 실시간 예약 정보 가져옴 @@@@@");
+				Thread.sleep(5000);
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
+		}
 	}
 }
