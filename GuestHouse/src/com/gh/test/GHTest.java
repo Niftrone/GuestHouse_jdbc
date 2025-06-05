@@ -3,20 +3,20 @@ package com.gh.test;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
-import com.gh.dao.impl.ghDAOImpl;
+import com.gh.dao.impl.GHDAOImpl;
 import com.gh.exception.IDNotFoundException;
 import com.gh.vo.Customer;
 import com.gh.vo.GuestHouse;
 import com.gh.vo.Reservation;
 import com.gh.vo.Room;
 
-public class ghTest implements Runnable {
+public class GHTest implements Runnable {
 	
-	ghDAOImpl gh;
+	GHDAOImpl gh;
 	
-	public ghTest() throws Exception {
+	public GHTest() throws Exception {
 		try {
-			gh = ghDAOImpl.getInstance();
+			gh = GHDAOImpl.getInstance();
 		} catch(Exception cnfe) {
 			System.out.println("GeHa Constructor : " + cnfe);
 		}
@@ -24,8 +24,8 @@ public class ghTest implements Runnable {
 	
 	public static void main(String[] args) throws Exception {
 		
-		ghDAOImpl gh = ghDAOImpl.getInstance();
-		ghTest geha = new ghTest();
+		GHDAOImpl gh = GHDAOImpl.getInstance();
+		GHTest geha = new GHTest();
 		Thread t = new Thread(geha);
 		t.start();
 		
