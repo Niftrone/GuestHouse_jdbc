@@ -45,4 +45,5 @@ public interface ghDAO {
 	String getSeasonalCount(int year) throws SQLException;
 	Map<Integer, GuestHouse> getPopularGH(String region) throws  SQLException;
 	String getGenderRatio(String ghId, int year, int month) throws SQLException;
+	String getGenderRatio(String ghId, int year) throws SQLException;
 }

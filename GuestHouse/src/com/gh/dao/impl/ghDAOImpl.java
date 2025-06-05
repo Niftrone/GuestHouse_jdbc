@@ -1,6 +1,5 @@
 package com.gh.dao.impl;
 
-import java.lang.reflect.Array;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -1081,9 +1080,116 @@ public class ghDAOImpl implements ghDAO {
 		return popularGHList;
 	}
 
+	// 연도 + 월 별 성별 통계
 	@Override
 	public String getGenderRatio(String ghId, int year, int month) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		String genderRatio  = null;
+		
+		
+		try {
+			conn = getConnect();
+			String selectQuery = "SELECT"
+					+ "				SUM(CASE WHEN u.u_gender = 'M' THEN 1 ELSE 0 END) AS male_count,\r\n"
+					+ "    			SUM(CASE WHEN u.u_gender = 'F' THEN 1 ELSE 0 END) AS female_count,\r\n"
+					+ "    			COUNT(r.rv_id) AS total_count"
+					+ "			  FROM reservation r"
+					+ "			  JOIN room rm ON r.rm_id = rm.rm_id"
+					+ "			  JOIN user u ON r.u_id = u.u_id"
+					+ "			  WHERE rm.gh_id = ?"
+					+ "           		AND YEAR(r.rv_sdate) = ?"
+					+ "			  		AND MONTH(r.rv_sdate) = ?";
+			
+			ps = conn.prepareStatement(selectQuery);
+			
+			ps.setString(1, ghId);
+			ps.setInt(2, year);
+			ps.setInt(3, month);
+			
+			rs = ps.executeQuery();
+
+			if (rs.next()) {
+				// 남성 예약 건수
+				int maleCount = rs.getInt("male_count");
+				// 여성 예약 건수 가져오기
+				int femaleCount = rs.getInt("female_count");
+				// 총 예약 건수 가져오기
+				int totalCount = rs.getInt("total_count");
+
+                if (totalCount == 0) {
+                    genderRatio = "해당 기간에 예약이 없습니다.";
+                } else {
+                    double maleRatio = (double) maleCount / totalCount * 100;
+                    double femaleRatio = (double) femaleCount / totalCount * 100;
+
+                    genderRatio = String.format(year + "년 " + month + "월 예약 남녀비율 통계 : 남성 : %.2f%%, 여성 : %.2f%%", maleRatio, femaleRatio);
+                }
+            } 
+		} catch (SQLException e) {
+			throw new DMLException("GenderRatio Error로 인하여 정보를 불러오지 못하였습니다.");
+		} finally {
+			closeAll(rs, ps, conn);
+		}
+		
+		return genderRatio;
+	}
+	
+	// 연도별 성별 통계
+	@Override
+	public String getGenderRatio(String ghId, int year) throws SQLException {
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		String genderRatio  = null;
+		
+		
+		try {
+			conn = getConnect();
+			String selectQuery = "SELECT"
+					+ "				SUM(CASE WHEN u.u_gender = 'M' THEN 1 ELSE 0 END) AS male_count,\r\n"
+					+ "    			SUM(CASE WHEN u.u_gender = 'F' THEN 1 ELSE 0 END) AS female_count,\r\n"
+					+ "    			COUNT(r.rv_id) AS total_count"
+					+ "			  FROM reservation r"
+					+ "			  JOIN room rm ON r.rm_id = rm.rm_id"
+					+ "			  JOIN user u ON r.u_id = u.u_id"
+					+ "			  WHERE rm.gh_id = ?"
+					+ "           		AND YEAR(r.rv_sdate) = ?";
+			
+			ps = conn.prepareStatement(selectQuery);
+			
+			ps.setString(1, ghId);
+			ps.setInt(2, year);
+			
+			rs = ps.executeQuery();
+
+			if (rs.next()) {
+				// 남성 예약 건수
+				int maleCount = rs.getInt("male_count");
+				// 여성 예약 건수 가져오기
+				int femaleCount = rs.getInt("female_count");
+				// 총 예약 건수 가져오기
+				int totalCount = rs.getInt("total_count");
+
+                if (totalCount == 0) {
+                    genderRatio = "해당 기간에 예약이 없습니다.";
+                } else {
+                    double maleRatio = (double) maleCount / totalCount * 100;
+                    double femaleRatio = (double) femaleCount / totalCount * 100;
+
+                    genderRatio = String.format(year + "년 예약 남녀비율 통계 : 남성 : %.2f%%, 여성 : %.2f%%", maleRatio, femaleRatio);
+                }
+            } 
+		} catch (SQLException e) {
+			throw new DMLException("GenderRatio Error로 인하여 정보를 불러오지 못하였습니다.");
+		} finally {
+			closeAll(rs, ps, conn);
+		}
+		
+		return genderRatio;
 	}
 }

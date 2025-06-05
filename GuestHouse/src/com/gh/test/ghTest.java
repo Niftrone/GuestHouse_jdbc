@@ -17,12 +17,17 @@ public class ghTest {
 		ghDAOImpl gh = ghDAOImpl.getInstance();
 		//String uId, String name, String phNum, LocalDate birthday, String gender
 		
-		try {
-			System.out.println(gh.getPopularGH("BUSAN"));
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		
+//		try {
+//			System.out.println(gh.getPopularGH("BUSAN"));
+//		} catch (Exception e) {
+//			System.out.println(e.getMessage());
+//		}
+//		
+//		try {
+//			System.out.println(gh.getGenderRatio("GH001", 2023));
+//		} catch (Exception e) {
+//			System.out.println(e.getMessage());
+//		}
 		// INSERT CHECK
 //		try {
 //			gh.insertCustomer(new Customer(
@@ -102,30 +107,30 @@ public class ghTest {
 //		} catch (Exception e) {
 //			System.out.println(e.getMessage());
 //		}
-		gh.setEventGH("GH010", LocalDate.of(2022, 8, 24) , LocalDate.of(2025, 9, 30), 0.1);
+//		gh.setEventGH("GH010", LocalDate.of(2022, 8, 24) , LocalDate.of(2025, 9, 30), 0.1);
 //		
-		try {
-			gh.deleteReservation("RV083");
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IDNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		
-		try {
-	        gh.insertReservation(new Reservation(
-	            "RV083", LocalDate.of(2025, 06, 20), LocalDate.of(2025, 06, 21), 1, 
-	            new Room("RM073",
-	                new GuestHouse("GH010", "별빛하우스", "Seoul")
-	                ,"별헤는방", "F", 63000, 1),
-	            new Customer("C035", "임재현","01011110035",  LocalDate.of(1988,10,15), "F")
-	            ));
-        } catch(Exception e) {
-            System.out.println(e.getMessage());
-        }
+//		try {
+//			gh.deleteReservation("RV083");
+//		} catch (SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IDNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//		
+//		try {
+//	        gh.insertReservation(new Reservation(
+//	            "RV083", LocalDate.of(2025, 06, 20), LocalDate.of(2025, 06, 21), 1, 
+//	            new Room("RM073",
+//	                new GuestHouse("GH010", "별빛하우스", "Seoul")
+//	                ,"별헤는방", "F", 63000, 1),
+//	            new Customer("C035", "임재현","01011110035",  LocalDate.of(1988,10,15), "F")
+//	            ));
+//        } catch(Exception e) {
+//            System.out.println(e.getMessage());
+//        }
 		
 
 //		try {
@@ -311,32 +316,32 @@ public class ghTest {
 //		}
 
 		
-		try {
-			System.out.println(gh.getQuarterSale("GH010", 2023));
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		// getCustomer
-		try {
-			System.out.println("=====C001 고객의 정보 조회1(예약 내역과 찜 목록 포함)=====");
-			System.out.println(gh.getCustomer("C001"));
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		// getCustomer2
-		try {
-			System.out.println("=====C001 고객의 정보 조회2(예약 내역과 찜 목록 포함)=====");
-			System.out.println(gh.getCustomer2("C001"));
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		// getWishList
-		try {
-			System.out.println("=====C001 고객의 찜 목록 조회=====");
-			gh.getWishList("C001").stream().forEach(g->System.out.println(g));
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
+//		try {
+//			System.out.println(gh.getQuarterSale("GH010", 2023));
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		}
+//		// getCustomer
+//		try {
+//			System.out.println("=====C001 고객의 정보 조회1(예약 내역과 찜 목록 포함)=====");
+//			System.out.println(gh.getCustomer("C001"));
+//		} catch (Exception e) {
+//			System.out.println(e.getMessage());
+//		}
+//		// getCustomer2
+//		try {
+//			System.out.println("=====C001 고객의 정보 조회2(예약 내역과 찜 목록 포함)=====");
+//			System.out.println(gh.getCustomer2("C001"));
+//		} catch (Exception e) {
+//			System.out.println(e.getMessage());
+//		}
+//		// getWishList
+//		try {
+//			System.out.println("=====C001 고객의 찜 목록 조회=====");
+//			gh.getWishList("C001").stream().forEach(g->System.out.println(g));
+//		} catch (Exception e) {
+//			System.out.println(e.getMessage());
+//		}
 		
 //		try {
 //			System.out.println(gh.getMonthSale(2023, 1));
