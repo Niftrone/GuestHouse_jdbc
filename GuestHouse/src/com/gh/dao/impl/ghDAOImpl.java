@@ -287,7 +287,7 @@ public class ghDAOImpl implements ghDAO {
 			rs = ps.executeQuery();
 			
 			if (rs.next()) {
-				customer = new Customer(uId, 
+				customer = new Customer(rs.getString("u_id"), 
 										rs.getString("u_name"), 
 										rs.getString("phnum"),
 										rs.getDate("birthday").toLocalDate(), 
@@ -368,7 +368,7 @@ public class ghDAOImpl implements ghDAO {
 		ArrayList<Customer> allCustomers = new ArrayList<Customer>();
 
 		try {
-			String selectQuery = "SELECT u_id, u_name, birthday, u_gender, phnum FROM user";
+			String selectQuery = "SELECT u_id, u_name, birthday, u_gender, phnum FROM user WHERE u_id NOT IN('M001', 'M002', 'M003', 'M004', 'M005')";
 
 			conn = getConnect();
 			ps = conn.prepareStatement(selectQuery);
@@ -379,16 +379,16 @@ public class ghDAOImpl implements ghDAO {
 				// DB에 저장된 user Table의 birthday 값이 null일 경우 Error를 발생
 				// SQL문으로 IFNULL() 사용하여 처리하려 했지만 LocalDate에서 인식을 못하는 Error가 발생
 				// java에서 처리하기로 결정, birthday == null -> null or birthday != null -> rs.getDate()로 해결
-				LocalDate birthday = (rs.getDate("birthday") != null) ? rs.getDate("birthday").toLocalDate() : null;
+				//LocalDate birthday = (rs.getDate("birthday") != null) ? rs.getDate("birthday").toLocalDate() : null;
 
 				// gender null일 경우 N/A (없다는 뜻임)
-				String gender = (rs.getString("u_gender") != null) ? rs.getString("u_gender") : "N/A";
+				//String gender = (rs.getString("u_gender") != null) ? rs.getString("u_gender") : "N/A";
 
 				allCustomers.add(new Customer(rs.getString("u_id"), 
 											  rs.getString("u_name"), 
 											  rs.getString("phnum"),
-											  birthday, 
-											  gender));
+											  rs.getDate("birthday").toLocalDate(),
+											  rs.getString("u_gender")));
 			}
 
 		} catch (SQLException e) {

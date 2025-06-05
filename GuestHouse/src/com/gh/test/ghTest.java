@@ -57,11 +57,11 @@ public class ghTest {
 
 //		
 //		// getCustomer
-//		try {
-//			System.out.println(gh.getAllCustomer());
-//		} catch (Exception e) {
-//			System.out.println(e.getMessage());
-//		}
+		try {
+			System.out.println(gh.getAllCustomer());
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
 
 //		try {
 
