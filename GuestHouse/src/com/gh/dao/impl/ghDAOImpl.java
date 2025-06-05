@@ -28,10 +28,9 @@ import config.ServerInfo;
 
 public class ghDAOImpl implements ghDAO {
 
-	// 싱글톤
+	/// 싱글톤 ///
 	// Test 클래스의 static 안이 아니라 생성자 안에서 드라이버 로딩 시키기
 	private static ghDAOImpl dao = new ghDAOImpl("127.0.0.1");
-
 	private ghDAOImpl(String serverIp) {
 		try {
 			Class.forName(ServerInfo.DRIVER_NAME);
@@ -40,8 +39,6 @@ public class ghDAOImpl implements ghDAO {
 			System.out.println(e.getMessage());
 		}
 	}
-	//dasdasd
-
 	public static ghDAOImpl getInstance() {
 		return dao;
 	}
@@ -135,7 +132,6 @@ public class ghDAOImpl implements ghDAO {
 	
 	private boolean isRoomAvailable(String rmId, LocalDate sDate, LocalDate eDate, int count, String gender, Connection conn) throws SQLException {
 	    int p = Period.between(sDate, eDate).getDays();
-
 	    for (int i = 0; i < p; i++) {
 	        String query = """
 	            SELECT CASE 
@@ -145,15 +141,12 @@ public class ghDAOImpl implements ghDAO {
 	                     ELSE NULL 
 	                   END fullrmId
 	              FROM reservation rv, user u, room rm
-	             WHERE rv.u_id = u.u_id
-	               AND rv.rm_id = rm.rm_id
+	             WHERE rv.u_id = u.u_id AND rv.rm_id = rm.rm_id
 	               AND u.u_gender = ?
-	               AND ? >= rv_sdate
-	               AND ? < rv_edate
+	               AND ? >= rv_sdate AND ? < rv_edate
 	               AND rv.rm_id = ?
 	             GROUP BY rv.rm_id
 	        """;
-
 	        try (PreparedStatement ps = conn.prepareStatement(query)) {
 	            ps.setInt(1, count);
 	            ps.setString(2, gender);
@@ -168,10 +161,8 @@ public class ghDAOImpl implements ghDAO {
 	            }
 	        }
 	    }
-
 	    return true; // 모든 날짜에 예약 가능
 	}
-
 
 	/// 비즈니스 로직 ///
 	// 자바의 date를 sql date로 변환하는 함수를 따로 만들어야 하는가?
@@ -279,7 +270,7 @@ public class ghDAOImpl implements ghDAO {
 			closeAll(ps, conn);
 		}
 	}
-
+	
 	@Override
 	public Customer getCustomer(String uId) throws SQLException, IDNotFoundException {
 		Connection conn = null;
@@ -312,6 +303,61 @@ public class ghDAOImpl implements ghDAO {
 		}
 		
 		return customer;
+	}
+	
+	@Override
+	public Customer getCustomer2(String uId) throws SQLException, IDNotFoundException {
+		Customer cust = null;
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			conn = getConnect();
+			String query = "SELECT u_id, u_name, birthday, u_gender, phnum FROM user WHERE u_id=?";
+			ps = conn.prepareStatement(query);
+			ps.setString(1, uId);
+			rs = ps.executeQuery();
+			if(rs.next()) {
+				cust = new Customer(rs.getString("u_id"),
+									rs.getString("u_name"),
+									rs.getString("phnum"),
+									rs.getDate("birthday").toLocalDate(),
+									rs.getString("u_gender"));
+				cust.setWishList(getWishList(uId));
+				// cust.setRvList(getReservation(uId)); // 우진님 반환타입 수정하면 주석 풀기
+			} else {
+				throw new IDNotFoundException(uId + " 라는 ID를 찾을 수 없어 고객 정보 조회에 실패하였습니다.");
+			}
+		} finally {
+			closeAll(rs, ps, conn);
+		}
+		return cust;
+	}
+	
+	@Override
+	public ArrayList<GuestHouse> getWishList(String uId) throws SQLException {
+		ArrayList<GuestHouse> wish = new ArrayList<GuestHouse>();
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			conn = getConnect();
+			String query = """
+						SELECT *
+						FROM wishlist JOIN guesthouse USING(gh_id)
+						WHERE u_id=?
+						ORDER BY gh_id
+							""";
+			ps = conn.prepareStatement(query);
+			ps.setString(1, uId);
+			rs = ps.executeQuery();
+			while(rs.next()) {
+				wish.add(new GuestHouse(rs.getString("gh_id"), rs.getString("gh_name"), rs.getString("gh_region")));
+			}
+		} finally {
+			closeAll(rs, ps, conn);
+		}
+		return wish;
 	}
 	
 	@Override
@@ -452,8 +498,6 @@ public class ghDAOImpl implements ghDAO {
 //					if(rs1.getString("fullrmId") != null && !fullrms.contains(rs1.getString("fullrmId")))
 //						fullrms.add(rs1.getString("fullrmId"));
 //				}
-////				System.out.println(sDate.plusDays(i));
-////				fullrms.stream().forEach(r->System.out.print(r));
 //			}
 //			String query2 = "SELECT rm_id FROM room WHERE rm_gender=?";
 //			ps2 = conn.prepareStatement(query2);
@@ -462,7 +506,6 @@ public class ghDAOImpl implements ghDAO {
 //			while(rs2.next()) {
 //				rooms.add(rs2.getString("rm_id"));
 //			}
-////			rooms.stream().forEach(r->System.out.print(r+" "));
 //			if(fullrms.size() != 0) {
 //				for(String r : fullrms) {
 //					rooms.remove(r);
@@ -710,7 +753,9 @@ public class ghDAOImpl implements ghDAO {
 			} else {
 				throw new DuplicateIDException("추가하려는 게스트하우스의 아이디는 이미 등록되어 있어 추가할 수 없습니다.");
 			}
-		} finally {
+		} catch (SQLException e) {
+				throw new DMLException("게스트하우스 정보를 등록하는 중 문제가 발생했습니다.");
+		}finally {
 			closeAll(rs, ps1, null);
 			closeAll(null, ps2, conn);
 		}
@@ -739,6 +784,8 @@ public class ghDAOImpl implements ghDAO {
 			} else {
 				throw new IDNotFoundException("수정하려는 게스트하우스는 없는 id 입니다.");
 			}
+		} catch (SQLException e) {
+			throw new DMLException("게스트하우스 정보를 수정하던 중 문제가 발생했습니다.");
 		} finally {
 			closeAll(rs, ps1, null);
 			closeAll(null, ps2, conn);
@@ -765,7 +812,9 @@ public class ghDAOImpl implements ghDAO {
 			} else {
 				throw new IDNotFoundException("삭제하려는 게스트하우스는 없는 id 입니다.");
 			}
-		} finally {
+		} catch (SQLException e) {
+			throw new DMLException("게스트하우스 정보를 삭제하던 중 문제가 발생했습니다."); 
+		}finally {
 			closeAll(rs, ps1, null);
 			closeAll(null, ps2, conn);
 		}
@@ -774,13 +823,11 @@ public class ghDAOImpl implements ghDAO {
 	@Override
 	public void repairRoom(String rmId, LocalDate sDate, LocalDate eDate){
 		repairInfo.put(rmId,new RepairInfo(sDate, eDate));
-
 	}
 
 	@Override
 	public void setEventGH(String ghId, LocalDate sDate, LocalDate eDate, double rate){
 		discountInfo.put(ghId, new DiscountInfo(sDate, eDate, rate));
-
 	}
 
 	@Override
@@ -817,18 +864,18 @@ public class ghDAOImpl implements ghDAO {
 
 		try{
 			conn = getConnect();
-			String query = "SELECT * FROM reservation WHERE rv_sdate >= ? AND rv_edate <= ?";
-
+			String query = """
+							SELECT * FROM reservation
+							WHERE rv_sdate >= ? AND rv_edate <= ?
+							""";
 			ps = conn.prepareStatement(query);
 			ps.setDate(1, java.sql.Date.valueOf(sDate));
 			ps.setDate(2, java.sql.Date.valueOf(eDate));
-
 			rs = ps.executeQuery();
 			
 			while (rs.next()) {
 				rvs.add(createRV(rs));
 			}
-
 		} catch (SQLException e) {
 			throw new DMLException(e.getMessage());
 		} finally {
@@ -964,21 +1011,14 @@ public class ghDAOImpl implements ghDAO {
 		try {
 			conn = getConnect();
 			String query = """
-						   SELECT 
-						   SUM(CASE WHEN YEAR(rv_sdate) = ? 
-						   	   AND MONTH(rv_sdate) 
-						   	   IN (6, 7, 8) THEN count ELSE 0 END) 
-						   	   AS summer, 
-						   SUM(CASE WHEN (YEAR(rv_sdate) = ? 
-						   	   AND MONTH(rv_sdate) = 12) 
-						   	   OR (YEAR(rv_sdate) = ? 
-						   	   AND MONTH(rv_sdate) 
-						   	   IN (1, 2)) 
-						   	   THEN count ELSE 0 END) 
-						   	   AS winter 
-						   FROM reservation
-					""";
-			
+						SELECT
+						SUM(CASE WHEN YEAR(rv_sdate) = ? AND MONTH(rv_sdate) IN (6, 7, 8)
+							THEN count ELSE 0 END) AS summer,
+						SUM(CASE WHEN (YEAR(rv_sdate) = ? AND MONTH(rv_sdate) = 12)
+								OR (YEAR(rv_sdate) = ? AND MONTH(rv_sdate) IN (1, 2))
+							THEN count ELSE 0 END) AS winter
+						FROM reservation
+							""";
 			ps = conn.prepareStatement(query);
 			ps.setInt(1, year);
 			ps.setInt(2, year);
@@ -1004,5 +1044,4 @@ public class ghDAOImpl implements ghDAO {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }
