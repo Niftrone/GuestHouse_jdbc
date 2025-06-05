@@ -9,24 +9,24 @@ import com.gh.vo.GuestHouse;
 import com.gh.vo.Reservation;
 import com.gh.vo.Room;
 
-//public class GHTest implements Runnable {
-public class GHTest{	
+public class GHTest implements Runnable {
+//public class GHTest{	
 	GHDAOImpl gh;
 	
-//	public GHTest() throws Exception {
-//		try {
-//			gh = GHDAOImpl.getInstance();
-//		} catch(Exception cnfe) {
-//			System.out.println("GeHa Constructor : " + cnfe);
-//		}
-//	}
+	public GHTest() throws Exception {
+		try {
+			gh = GHDAOImpl.getInstance();
+		} catch(Exception cnfe) {
+			System.out.println("GeHa Constructor : " + cnfe);
+		}
+	}
 	
 	public static void main(String[] args) throws Exception {
 		
 		GHDAOImpl gh = GHDAOImpl.getInstance();
-//		GHTest geha = new GHTest();
-//		Thread t = new Thread(geha);
-//		t.start();
+		GHTest geha = new GHTest();
+		Thread t = new Thread(geha);
+		t.start();
 		
 		System.out.println("@@@@@@@@@@@@@@@@insertCustomer 실행@@@@@@@@@@@@@@@@@@");
 		
@@ -136,7 +136,7 @@ public class GHTest{
 
 		try {
 	        gh.insertReservation(new Reservation(
-	            "RV083", LocalDate.of(2025, 06, 20), LocalDate.of(2025, 06, 21), 1, 
+	            "RV121", LocalDate.of(2025, 06, 20), LocalDate.of(2025, 06, 21), 1, 
 	            new Room("RM073",
 	                new GuestHouse("GH010", "별빛하우스", "Seoul")
 	                ,"별헤는방", "F", 63000, 1),
@@ -172,7 +172,7 @@ public class GHTest{
 		System.out.println("@@@@@@@@@@@@@@@@deleteReservation 실행@@@@@@@@@@@@@@@@@@");
 
 		try {
-			gh.deleteReservation("RV083");
+			gh.deleteReservation("RV082");
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
@@ -351,18 +351,18 @@ public class GHTest{
 
 	}
 
-//	@Override
-//	public void run() {
-//		// 쓰레드가 작업하는 코드를 작성
-//		// 실시간으로 reservation 테이블의 전체 정보를 가져와서 출력
-//		while(true) {
-//			try {
-//				gh.getAllRV().stream().forEach(r->System.out.println(r));
-//				System.out.println("@@@@@ 실시간 예약 정보 가져옴 @@@@@");
-//				Thread.sleep(5000);
-//			} catch (Exception e) {
-//				System.out.println(e.getMessage());
-//			}
-//		}
-//	}
+	@Override
+	public void run() {
+		// 쓰레드가 작업하는 코드를 작성
+		// 실시간으로 reservation 테이블의 전체 정보를 가져와서 출력
+		while(true) {
+			try {
+				gh.getAllRV().stream().forEach(r->System.out.println(r));
+				System.out.println("@@@@@ 실시간 예약 정보 가져옴 @@@@@");
+				Thread.sleep(5000);
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
+		}
+	}
 }
