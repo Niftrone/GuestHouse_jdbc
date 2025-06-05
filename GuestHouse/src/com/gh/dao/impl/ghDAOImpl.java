@@ -1047,16 +1047,18 @@ public class ghDAOImpl implements ghDAO {
 			 *  DENSE_RANK()을 통해서 순위가 공동이어도 1,1,2,3,4,5 이런식으로 순위가 매겨진다.
 			 *  중복 값이 발생될 수 있기에, 2차적으로 게하별 매출을 비교하여 순위를 반드시 중복없이 매기도록 한다.
 			 */
-			String selectQuery = "SELECT gh_id, gh_name, gh_region, total_reservations, total_sales, ranking"
-					+ "			  FROM (SELECT gh.gh_id, gh.gh_name, gh.gh_region, COUNT(r.rv_id) AS total_reservations, SUM(r.rv_price) AS total_sales,"
-					+ "			  		DENSE_RANK() OVER(PARTITION BY gh.gh_region ORDER BY COUNT(r.rv_id) DESC, SUM(r.rv_price) DESC) AS ranking"
-					+ "			  		FROM guesthouse gh"
-					+ "			  		LEFT JOIN room rm ON gh.gh_id = rm.gh_id"
-					+ "			  		LEFT JOIN reservation r ON rm.rm_id = r.rm_id"
-					+ "			  		WHERE gh.gh_region = ?"
-					+ "			  		GROUP BY gh.gh_id, gh.gh_name, gh.gh_region) AS ranked_gh"
-					+ "			  ORDER BY ranking ASC, total_reservations DESC, gh_id ASC"
-					+ "			  LIMIT 5";
+			String selectQuery = """
+					SELECT gh_id, gh_name, gh_region, total_reservations, total_sales, ranking"
+					FROM (SELECT gh.gh_id, gh.gh_name, gh.gh_region, COUNT(r.rv_id) AS total_reservations, SUM(r.rv_price) AS total_sales,
+					 	  DENSE_RANK() OVER(PARTITION BY gh.gh_region ORDER BY COUNT(r.rv_id) DESC, SUM(r.rv_price) DESC) AS ranking
+					 	  FROM guesthouse gh
+					 	  LEFT JOIN room rm ON gh.gh_id = rm.gh_id
+					      LEFT JOIN reservation r ON rm.rm_id = r.rm_id
+	 			  		  WHERE gh.gh_region = ?
+						  GROUP BY gh.gh_id, gh.gh_name, gh.gh_region) AS ranked_gh
+	 			     ORDER BY ranking ASC, total_reservations DESC, gh_id ASC
+	 			     LIMIT 5
+					""";
 			
 			conn = getConnect();
 			ps = conn.prepareStatement(selectQuery);
@@ -1093,16 +1095,18 @@ public class ghDAOImpl implements ghDAO {
 		
 		try {
 			conn = getConnect();
-			String selectQuery = "SELECT"
-					+ "				SUM(CASE WHEN u.u_gender = 'M' THEN 1 ELSE 0 END) AS male_count,\r\n"
-					+ "    			SUM(CASE WHEN u.u_gender = 'F' THEN 1 ELSE 0 END) AS female_count,\r\n"
-					+ "    			COUNT(r.rv_id) AS total_count"
-					+ "			  FROM reservation r"
-					+ "			  JOIN room rm ON r.rm_id = rm.rm_id"
-					+ "			  JOIN user u ON r.u_id = u.u_id"
-					+ "			  WHERE rm.gh_id = ?"
-					+ "           		AND YEAR(r.rv_sdate) = ?"
-					+ "			  		AND MONTH(r.rv_sdate) = ?";
+			String selectQuery = """
+						SELECT
+					 		SUM(CASE WHEN u.u_gender = 'M' THEN 1 ELSE 0 END) AS male_count,\r\n
+					     	SUM(CASE WHEN u.u_gender = 'F' THEN 1 ELSE 0 END) AS female_count,\r\n
+					     	COUNT(r.rv_id) AS total_count
+					 	FROM reservation r
+					 	JOIN room rm ON r.rm_id = rm.rm_id
+					 	JOIN user u ON r.u_id = u.u_id
+					 	WHERE rm.gh_id = ?
+					    AND YEAR(r.rv_sdate) = ?
+					 	AND MONTH(r.rv_sdate) = ?
+					""" ;
 			
 			ps = conn.prepareStatement(selectQuery);
 			
@@ -1150,15 +1154,17 @@ public class ghDAOImpl implements ghDAO {
 		
 		try {
 			conn = getConnect();
-			String selectQuery = "SELECT"
-					+ "				SUM(CASE WHEN u.u_gender = 'M' THEN 1 ELSE 0 END) AS male_count,\r\n"
-					+ "    			SUM(CASE WHEN u.u_gender = 'F' THEN 1 ELSE 0 END) AS female_count,\r\n"
-					+ "    			COUNT(r.rv_id) AS total_count"
-					+ "			  FROM reservation r"
-					+ "			  JOIN room rm ON r.rm_id = rm.rm_id"
-					+ "			  JOIN user u ON r.u_id = u.u_id"
-					+ "			  WHERE rm.gh_id = ?"
-					+ "           		AND YEAR(r.rv_sdate) = ?";
+			String selectQuery = """ 
+						SELECT
+							SUM(CASE WHEN u.u_gender = 'M' THEN 1 ELSE 0 END) AS male_count,
+					  		SUM(CASE WHEN u.u_gender = 'F' THEN 1 ELSE 0 END) AS female_count,
+					  		COUNT(r.rv_id) AS total_count
+						FROM reservation r
+						JOIN room rm ON r.rm_id = rm.rm_id
+						JOIN user u ON r.u_id = u.u_id
+						WHERE rm.gh_id = ?
+					    AND YEAR(r.rv_sdate) = ?
+					""";
 			
 			ps = conn.prepareStatement(selectQuery);
 			
@@ -1181,7 +1187,7 @@ public class ghDAOImpl implements ghDAO {
                     double maleRatio = (double) maleCount / totalCount * 100;
                     double femaleRatio = (double) femaleCount / totalCount * 100;
 
-                    genderRatio = String.format(year + "년 예약 남녀비율 통계 : 남성 : %.2f%%, 여성 : %.2f%%", maleRatio, femaleRatio);
+                    genderRatio = String.format(year + "년 예약 남녀비율 통계  남성 : %.2f%%, 여성 : %.2f%%", maleRatio, femaleRatio);
                 }
             } 
 		} catch (SQLException e) {

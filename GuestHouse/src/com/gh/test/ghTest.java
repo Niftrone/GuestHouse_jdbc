@@ -23,11 +23,11 @@ public class ghTest {
 //			System.out.println(e.getMessage());
 //		}
 //		
-//		try {
-//			System.out.println(gh.getGenderRatio("GH001", 2023));
-//		} catch (Exception e) {
-//			System.out.println(e.getMessage());
-//		}
+		try {
+			System.out.println(gh.getGenderRatio("GH001", 2023));
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
 		// INSERT CHECK
 //		try {
 //			gh.insertCustomer(new Customer(
