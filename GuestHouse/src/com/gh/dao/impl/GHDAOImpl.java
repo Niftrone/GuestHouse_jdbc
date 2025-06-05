@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.gh.dao.GHDAO;
-import com.gh.dao.ghDAO;
 import com.gh.exception.DMLException;
 import com.gh.exception.DuplicateIDException;
 import com.gh.exception.IDNotFoundException;
@@ -1049,7 +1048,7 @@ public class GHDAOImpl implements GHDAO {
 			 *  중복 값이 발생될 수 있기에, 2차적으로 게하별 매출을 비교하여 순위를 반드시 중복없이 매기도록 한다.
 			 */
 			String selectQuery = """
-					SELECT gh_id, gh_name, gh_region, total_reservations, total_sales, ranking"
+					SELECT gh_id, gh_name, gh_region, total_reservations, total_sales, ranking
 					FROM (SELECT gh.gh_id, gh.gh_name, gh.gh_region, COUNT(r.rv_id) AS total_reservations, SUM(r.rv_price) AS total_sales,
 					 	  DENSE_RANK() OVER(PARTITION BY gh.gh_region ORDER BY COUNT(r.rv_id) DESC, SUM(r.rv_price) DESC) AS ranking
 					 	  FROM guesthouse gh
@@ -1076,7 +1075,7 @@ public class GHDAOImpl implements GHDAO {
 			}
 			
 		} catch (SQLException e) {
-			throw new DMLException("인기 게스트하우스 정보를 불러오는 데 실패하였습니다.");
+			throw new DMLException("인기 게스트하우스 정보를 불러오는 데 실패하였습니다." + e.getMessage());
 		} finally {
 			closeAll(rs, ps, conn);
 		}
