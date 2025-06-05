@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.gh.dao.GHDAO;
-import com.gh.dao.ghDAO;
 import com.gh.exception.DMLException;
 import com.gh.exception.DuplicateIDException;
 import com.gh.exception.IDNotFoundException;
