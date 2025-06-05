@@ -17,6 +17,12 @@ public class ghTest {
 		ghDAOImpl gh = ghDAOImpl.getInstance();
 		//String uId, String name, String phNum, LocalDate birthday, String gender
 		
+		try {
+			System.out.println(gh.getPopularGH("BUSAN"));
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		
 		// INSERT CHECK
 //		try {
 //			gh.insertCustomer(new Customer(
