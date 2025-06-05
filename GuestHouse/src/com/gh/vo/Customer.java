@@ -50,6 +50,6 @@ public class Customer extends User {
 	@Override
 	public String toString() {
 		return super.toString() + ", birthday=" + birthday + ", gender=" + gender + ",\n\t wishList=" + wishList
-				+ ", rvList=" + rvList + "]";
+				+ ",\n\t rvList=" + rvList + "]";
 	}
 }

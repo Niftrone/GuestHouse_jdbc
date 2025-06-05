@@ -325,7 +325,7 @@ public class ghDAOImpl implements ghDAO {
 									rs.getDate("birthday").toLocalDate(),
 									rs.getString("u_gender"));
 				cust.setWishList(getWishList(uId));
-				// cust.setRvList(getReservation(uId)); // 우진님 반환타입 수정하면 주석 풀기
+				cust.setRvList(getReservation(uId));
 			} else {
 				throw new IDNotFoundException(uId + " 라는 ID를 찾을 수 없어 고객 정보 조회에 실패하였습니다.");
 			}
