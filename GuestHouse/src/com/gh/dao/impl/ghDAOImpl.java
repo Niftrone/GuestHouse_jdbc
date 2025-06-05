@@ -933,10 +933,10 @@ public class ghDAOImpl implements ghDAO {
 			conn = getConnect();
 			String query = """
 							SELECT CASE
-									WHEN month(rv_sdate) BETWEEN 1 AND 3 THEN 'Q1'
-									WHEN month(rv_sdate) BETWEEN 4 AND 6 THEN 'Q2'
-									WHEN month(rv_sdate) BETWEEN 7 AND 9 THEN 'Q3'
-									WHEN month(rv_sdate) BETWEEN 10 AND 12 THEN 'Q4'
+									WHEN quarter(rv_sdate) = 1 THEN 'Q1'
+									WHEN quarter(rv_sdate) = 2 THEN 'Q2'
+									WHEN quarter(rv_sdate) = 3 THEN 'Q3'
+									WHEN quarter(rv_sdate) = 4 THEN 'Q4'
 							        END quarter,
 							        SUM(rv_price) as total
 							FROM reservation r
