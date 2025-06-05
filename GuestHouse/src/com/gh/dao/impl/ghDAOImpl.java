@@ -986,8 +986,8 @@ public class ghDAOImpl implements ghDAO {
 						   WHERE rv_sdate >= ? AND rv_sdate < ?
 						   """;
 			ps = conn.prepareStatement(query);
-			ps.setDate(1, Date.valueOf(start));
-			ps.setDate(2, Date.valueOf(end));
+			ps.setDate(1, java.sql.Date.valueOf(start));
+			ps.setDate(2, java.sql.Date.valueOf(end));
 			rs = ps.executeQuery();
 			
 			if (rs.next()) {
