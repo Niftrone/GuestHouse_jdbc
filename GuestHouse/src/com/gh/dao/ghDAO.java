@@ -10,7 +10,6 @@ import com.gh.exception.IDNotFoundException;
 import com.gh.vo.Customer;
 import com.gh.vo.GuestHouse;
 import com.gh.vo.Reservation;
-import com.gh.vo.Room;
 
 public interface ghDAO {
 	//client
@@ -18,6 +17,7 @@ public interface ghDAO {
 	void updateCustomer(Customer cust) throws  SQLException, IDNotFoundException;
 	void deleteCustomer(String uId) throws  SQLException, IDNotFoundException;
 	Customer getCustomer(String uId) throws  SQLException, IDNotFoundException;
+	Customer getCustomer2(String uId) throws  SQLException, IDNotFoundException;
 	ArrayList<Customer> getAllCustomer() throws  SQLException;
 	ArrayList<GuestHouse> getAllGH() throws SQLException;
 	ArrayList<GuestHouse> getAllGH(String region) throws SQLException;
@@ -28,6 +28,7 @@ public interface ghDAO {
 	void deleteReservation(String rvId) throws SQLException, IDNotFoundException;
 	void insertWishList(String uId, String ghId) throws SQLException, IDNotFoundException;
 	void deleteWishList(String uId, String ghId) throws SQLException, IDNotFoundException;
+	ArrayList<GuestHouse> getWishList(String uId) throws SQLException;
 	
 	//manager
 	void insertGH(GuestHouse gh) throws SQLException, DuplicateIDException;

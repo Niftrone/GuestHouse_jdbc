@@ -7,8 +7,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -147,11 +150,9 @@ public class ghDAOImpl implements ghDAO {
 	                     ELSE NULL 
 	                   END fullrmId
 	              FROM reservation rv, user u, room rm
-	             WHERE rv.u_id = u.u_id
-	               AND rv.rm_id = rm.rm_id
+	             WHERE rv.u_id = u.u_id AND rv.rm_id = rm.rm_id
 	               AND u.u_gender = ?
-	               AND ? >= rv_sdate
-	               AND ? < rv_edate
+	               AND ? >= rv_sdate AND ? < rv_edate
 	               AND rv.rm_id = ?
 	             GROUP BY rv.rm_id
 	        """;
@@ -281,7 +282,7 @@ public class ghDAOImpl implements ghDAO {
 			closeAll(ps, conn);
 		}
 	}
-
+	
 	@Override
 	public Customer getCustomer(String uId) throws SQLException, IDNotFoundException {
 		Connection conn = null;
@@ -314,6 +315,61 @@ public class ghDAOImpl implements ghDAO {
 		}
 		
 		return customer;
+	}
+	
+	@Override
+	public Customer getCustomer2(String uId) throws SQLException, IDNotFoundException {
+		Customer cust = null;
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			conn = getConnect();
+			String query = "SELECT u_id, u_name, birthday, u_gender, phnum FROM user WHERE u_id=?";
+			ps = conn.prepareStatement(query);
+			ps.setString(1, uId);
+			rs = ps.executeQuery();
+			if(rs.next()) {
+				cust = new Customer(rs.getString("u_id"),
+									rs.getString("u_name"),
+									rs.getString("phnum"),
+									rs.getDate("birthday").toLocalDate(),
+									rs.getString("u_gender"));
+				cust.setWishList(getWishList(uId));
+				// cust.setRvList(getReservation(uId)); // 우진님 반환타입 수정하면 주석 풀기
+			} else {
+				throw new IDNotFoundException(uId + " 라는 ID를 찾을 수 없어 고객 정보 조회에 실패하였습니다.");
+			}
+		} finally {
+			closeAll(rs, ps, conn);
+		}
+		return cust;
+	}
+	
+	@Override
+	public ArrayList<GuestHouse> getWishList(String uId) throws SQLException {
+		ArrayList<GuestHouse> wish = new ArrayList<GuestHouse>();
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			conn = getConnect();
+			String query = """
+						SELECT *
+						FROM wishlist JOIN guesthouse USING(gh_id)
+						WHERE u_id=?
+						ORDER BY gh_id
+							""";
+			ps = conn.prepareStatement(query);
+			ps.setString(1, uId);
+			rs = ps.executeQuery();
+			while(rs.next()) {
+				wish.add(new GuestHouse(rs.getString("gh_id"), rs.getString("gh_name"), rs.getString("gh_region")));
+			}
+		} finally {
+			closeAll(rs, ps, conn);
+		}
+		return wish;
 	}
 	
 	@Override
@@ -754,7 +810,15 @@ public class ghDAOImpl implements ghDAO {
 		ResultSet rs = null;
 		try {
 			conn = getConnect();
-			String query = "SELECT SUM(CASE WHEN YEAR(rv_sdate) = ? AND MONTH(rv_sdate) IN (6, 7, 8) THEN count ELSE 0 END) AS summer, SUM(CASE WHEN (YEAR(rv_sdate) = ? AND MONTH(rv_sdate) = 12) OR (YEAR(rv_sdate) = ? AND MONTH(rv_sdate) IN (1, 2)) THEN count ELSE 0 END) AS winter FROM reservation";
+			String query = """
+						SELECT
+						SUM(CASE WHEN YEAR(rv_sdate) = ? AND MONTH(rv_sdate) IN (6, 7, 8)
+							THEN count ELSE 0 END) AS summer,
+						SUM(CASE WHEN (YEAR(rv_sdate) = ? AND MONTH(rv_sdate) = 12)
+								OR (YEAR(rv_sdate) = ? AND MONTH(rv_sdate) IN (1, 2))
+							THEN count ELSE 0 END) AS winter
+						FROM reservation
+							""";
 			ps = conn.prepareStatement(query);
 			ps.setInt(1, year);
 			ps.setInt(2, year);

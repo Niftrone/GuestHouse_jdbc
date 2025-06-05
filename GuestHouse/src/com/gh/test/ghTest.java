@@ -279,5 +279,26 @@ public class ghTest {
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		}
+		// getCustomer
+		try {
+			System.out.println("=====C001 고객의 정보 조회1(예약 내역과 찜 목록 포함)=====");
+			System.out.println(gh.getCustomer("C001"));
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		// getCustomer2
+		try {
+			System.out.println("=====C001 고객의 정보 조회2(예약 내역과 찜 목록 포함)=====");
+			System.out.println(gh.getCustomer2("C001"));
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		// getWishList
+		try {
+			System.out.println("=====C001 고객의 찜 목록 조회=====");
+			gh.getWishList("C001").stream().forEach(g->System.out.println(g));
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
 	}
 }
