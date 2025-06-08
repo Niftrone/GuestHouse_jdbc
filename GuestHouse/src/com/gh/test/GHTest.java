@@ -246,7 +246,7 @@ public class GHTest implements Runnable {
 		
 		System.out.println("******************** setEventGH 실행 ********************");
 		System.out.println("===== GH005 게스트하우스 빅 할인 이벤트 공지 =====");
-		gh.setEventGH("GH005", LocalDate.of(2024,1,1), LocalDate.of(2025,12,31), 0.5);
+		gh.setEventGH("GH005", LocalDate.of(2025,1,1), LocalDate.of(2025,12,31), 0.5);
 		try {
 	        gh.insertReservation(new Reservation(
 	            "RV150", LocalDate.of(2025, 06, 20), LocalDate.of(2025, 06, 21), 1, 

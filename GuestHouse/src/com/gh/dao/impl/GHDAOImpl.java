@@ -379,12 +379,14 @@ public class GHDAOImpl implements GHDAO {
 
 				// gender null일 경우 N/A (없다는 뜻임)
 				//String gender = (rs.getString("u_gender") != null) ? rs.getString("u_gender") : "N/A";
-
-				allCustomers.add(new Customer(rs.getString("u_id"), 
+				Customer cust = new Customer(rs.getString("u_id"), 
 											  rs.getString("u_name"), 
 											  rs.getString("phnum"),
 											  rs.getDate("birthday").toLocalDate(),
-											  rs.getString("u_gender")));
+											  rs.getString("u_gender"));
+				cust.setWishList(getWishList(rs.getString("u_id")));
+				cust.setRvList(getReservation(rs.getString("u_id")));
+				allCustomers.add(cust);
 			}
 
 		} catch (SQLException e) {
@@ -1086,8 +1088,8 @@ public class GHDAOImpl implements GHDAO {
 			conn = getConnect();
 			String selectQuery = """
 						SELECT
-					 		SUM(CASE WHEN u.u_gender = 'M' THEN 1 ELSE 0 END) AS male_count,\r\n
-					     	SUM(CASE WHEN u.u_gender = 'F' THEN 1 ELSE 0 END) AS female_count,\r\n
+					 		SUM(CASE WHEN u.u_gender = 'M' THEN 1 ELSE 0 END) AS male_count,
+					     	SUM(CASE WHEN u.u_gender = 'F' THEN 1 ELSE 0 END) AS female_count,
 					     	COUNT(r.rv_id) AS total_count
 					 	FROM reservation r
 					 	JOIN room rm ON r.rm_id = rm.rm_id
