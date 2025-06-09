@@ -485,7 +485,15 @@ public class GHDAOImpl implements GHDAO {
 //		try {
 //			conn = getConnect();
 //			for(int i=0; i<p; i++) {
-//				String query1 = "SELECT CASE WHEN sum(rv.count) >= rm.capacity AND sum(rv.count)+? > rm.capacity THEN rv.rm_id ELSE NULL END fullrmId FROM reservation rv,  user u, room rm WHERE rv.u_id = u.u_id AND rv.rm_id = rm.rm_id AND u.u_gender=? AND (?>=rv_sdate AND ?<rv_edate) GROUP BY rv.rm_id";
+//				String query1 = """
+//						SELECT CASE WHEN sum(rv.count) >= rm.capacity AND sum(rv.count)+? > rm.capacity
+//									THEN rv.rm_id ELSE NULL END fullrmId
+//						FROM reservation rv,  user u, room rm
+//						WHERE rv.u_id = u.u_id AND rv.rm_id = rm.rm_id
+//							AND u.u_gender=?
+//							AND (?>=rv_sdate AND ?<rv_edate)
+//						GROUP BY rv.rm_id"
+//						""";
 //				ps1 = conn.prepareStatement(query1);
 //				ps1.setInt(1, count);
 //				ps1.setString(2, gender);
@@ -511,7 +519,7 @@ public class GHDAOImpl implements GHDAO {
 //			}
 //		} finally {
 //			closeAll(rs1, ps1, null);
-//			closeAll(rs2, ps2, null);
+//			closeAll(rs2, ps2, conn);
 //		}
 //		return rooms;
 //	}
@@ -1088,9 +1096,9 @@ public class GHDAOImpl implements GHDAO {
 			conn = getConnect();
 			String selectQuery = """
 						SELECT
-					 		SUM(CASE WHEN u.u_gender = 'M' THEN 1 ELSE 0 END) AS male_count,
-					     	SUM(CASE WHEN u.u_gender = 'F' THEN 1 ELSE 0 END) AS female_count,
-					     	COUNT(r.rv_id) AS total_count
+					 		SUM(CASE WHEN u.u_gender = 'M' THEN r.count ELSE 0 END) AS male_count,
+					     	SUM(CASE WHEN u.u_gender = 'F' THEN r.count ELSE 0 END) AS female_count,
+					     	SUM(r.count) AS total_count
 					 	FROM reservation r
 					 	JOIN room rm ON r.rm_id = rm.rm_id
 					 	JOIN user u ON r.u_id = u.u_id
@@ -1147,9 +1155,9 @@ public class GHDAOImpl implements GHDAO {
 			conn = getConnect();
 			String selectQuery = """ 
 						SELECT
-							SUM(CASE WHEN u.u_gender = 'M' THEN 1 ELSE 0 END) AS male_count,
-					  		SUM(CASE WHEN u.u_gender = 'F' THEN 1 ELSE 0 END) AS female_count,
-					  		COUNT(r.rv_id) AS total_count
+							SUM(CASE WHEN u.u_gender = 'M' THEN r.count ELSE 0 END) AS male_count,
+					  		SUM(CASE WHEN u.u_gender = 'F' THEN r.count ELSE 0 END) AS female_count,
+					  		SUM(r.count) AS total_count
 						FROM reservation r
 						JOIN room rm ON r.rm_id = rm.rm_id
 						JOIN user u ON r.u_id = u.u_id
